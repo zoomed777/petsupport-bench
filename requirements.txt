@@ -1,0 +1,16 @@
+fastapi>=0.110.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+pydantic>=2.6.0
+uvicorn>=0.27.0
+redis>=5.0.0
+python-json-logger>=2.0.0
+sentence-transformers>=3.0.0
+numpy>=1.24.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-core>=0.3.0
+pyyaml>=6.0.0
+streamlit>=1.36.0
+openai>=1.40.0
+matplotlib>=3.8.0

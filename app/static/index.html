@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>客服 Agent · 管理</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #f0f2f5; color: #172033;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Microsoft YaHei", sans-serif;
+    }
+    header {
+      background: #fff; border-bottom: 1px solid #dce3ea;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .shell { width: min(960px, calc(100vw - 32px)); margin: 0 auto; }
+    .topbar {
+      min-height: 60px; display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+    }
+    h1 { margin: 0; font-size: 18px; }
+    .sub { color: #667085; font-size: 12px; }
+    .pill {
+      display: inline-flex; align-items: center; min-height: 24px;
+      border-radius: 999px; padding: 2px 10px; font-size: 11px; font-weight: 700;
+    }
+    .pill.ok { background: #d1fae5; color: #065f46; }
+    .pill.warn { background: #fef3c7; color: #b45309; }
+    .pill.err { background: #fee2e2; color: #b91c1c; }
+
+    nav.tabs {
+      display: flex; gap: 0; border-bottom: 2px solid #dce3ea;
+    }
+    nav.tabs button {
+      border: 0; background: none; padding: 12px 20px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      color: #667085; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: color .15s, border-color .15s;
+    }
+    nav.tabs button.active { color: #0f766e; border-bottom-color: #0f766e; }
+    nav.tabs button:hover { color: #0f766e; }
+
+    .tab-content { display: none; padding: 16px 0; }
+    .tab-content.active { display: block; }
+
+    main { padding: 0 0 24px; }
+
+    .config-panel {
+      background: #fff; border: 1px solid #dce3ea;
+      border-radius: 10px; padding: 14px; margin-bottom: 14px;
+    }
+    .config-row {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    }
+    .config-row label { font-size: 12px; color: #667085; display: block; margin-bottom: 3px; }
+    .config-row input, .config-row textarea {
+      border: 1px solid #dce3ea; border-radius: 6px;
+      padding: 8px 10px; font: inherit; font-size: 13px; width: 100%;
+    }
+    .config-row input:focus, .config-row textarea:focus {
+      outline: none; border-color: #0f766e;
+      box-shadow: 0 0 0 3px rgba(15,118,110,.12);
+    }
+    .chat-box {
+      background: #fff; border: 1px solid #dce3ea;
+      border-radius: 10px; min-height: 360px;
+      display: flex; flex-direction: column;
+    }
+    .chat-header {
+      padding: 12px 14px; border-bottom: 1px solid #dce3ea;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .chat-header .conv-id { color: #667085; font-size: 12px; }
+    .chat-msgs {
+      flex: 1; padding: 14px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 300px; max-height: 480px;
+    }
+    .msg {
+      padding: 10px 14px; border-radius: 8px; max-width: 88%;
+      line-height: 1.5; font-size: 14px; white-space: pre-wrap; word-break: break-word;
+    }
+    .msg.user { background: #dbeafe; align-self: flex-end; }
+    .msg.assistant { background: #d1fae5; align-self: flex-start; }
+    .msg.tool { background: #f3f4f6; align-self: flex-start; font-family: monospace; font-size: 13px; }
+    .msg.thought {
+      background: #fef3c7; align-self: flex-start;
+      font-style: italic; font-size: 13px; color: #92400e;
+    }
+    .msg .label { font-size: 11px; color: #667085; margin-bottom: 3px; font-weight: 700; }
+    .msg .meta { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+    .msg.system { background: #f0f0f0; align-self: center; font-size: 13px; color: #6b7280; }
+    .msg.escalate {
+      background: #fee2e2; align-self: center; font-size: 14px;
+      border: 1px solid #fca5a5; text-align: center;
+    }
+    .typing-indicator {
+      align-self: flex-start; display: none; padding: 10px 14px;
+      background: #d1fae5; border-radius: 8px; font-size: 14px;
+    }
+    .typing-indicator.show { display: inline-flex; align-items: center; gap: 4px; }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #065f46;
+      animation: typingBounce 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+    .chat-input {
+      display: flex; gap: 8px; padding: 10px 14px;
+      border-top: 1px solid #dce3ea;
+    }
+    .chat-input input { flex: 1; border: 1px solid #dce3ea; border-radius: 6px; padding: 9px 12px; font: inherit; font-size: 14px; }
+    .chat-input input:focus { outline: none; border-color: #0f766e; }
+    .chat-input button {
+      border: 0; border-radius: 6px; background: #0f766e; color: #fff;
+      padding: 9px 18px; font-weight: 700; cursor: pointer;
+    }
+    .chat-input button:hover { background: #065f46; }
+    .chat-input button:disabled { opacity: .5; cursor: not-allowed; }
+    .empty-chat {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; flex: 1; color: #9ca3af; gap: 8px;
+    }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #dce3ea; border-top-color: #0f766e;
+      border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* History Tab */
+    .hist-controls {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .hist-controls input, .hist-controls select {
+      border: 1px solid #dce3ea; border-radius: 6px; padding: 7px 10px; font-size: 13px;
+    }
+    .hist-controls button {
+      border: 0; border-radius: 6px; background: #0f766e; color: #fff;
+      padding: 8px 16px; font-weight: 700; cursor: pointer;
+    }
+    .hist-controls button:hover { background: #065f46; }
+    .hist-table-wrap {
+      background: #fff; border: 1px solid #dce3ea; border-radius: 10px; overflow: hidden;
+    }
+    table.hist-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    table.hist-table th {
+      background: #f9fafb; text-align: left; padding: 10px 12px;
+      font-size: 12px; color: #667085; border-bottom: 1px solid #dce3ea;
+    }
+    table.hist-table td {
+      padding: 10px 12px; border-bottom: 1px solid #edf1f5;
+      vertical-align: top;
+    }
+    table.hist-table tr:hover td { background: #f9fafb; }
+    table.hist-table tr:last-child td { border: 0; }
+    .hist-empty { text-align: center; padding: 40px; color: #9ca3af; }
+
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 12px; padding: 12px; font-size: 13px;
+    }
+    .pagination button {
+      border: 1px solid #dce3ea; border-radius: 6px;
+      background: #fff; padding: 6px 14px; cursor: pointer; font-size: 13px;
+    }
+    .pagination button:disabled { opacity: .4; cursor: default; }
+    .pagination button:hover:not(:disabled) { background: #f3f4f6; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 1000; align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: 12px; max-width: 700px; width: 90%;
+      max-height: 80vh; overflow-y: auto; padding: 24px;
+    }
+    .modal-box h2 { margin: 0 0 16px; font-size: 17px; }
+    .modal-box .close-btn {
+      float: right; border: 0; background: none; font-size: 22px;
+      cursor: pointer; color: #667085;
+    }
+    .modal-box .close-btn:hover { color: #172033; }
+    .modal-box .field-group { margin-bottom: 12px; }
+    .modal-box .field-label { font-size: 12px; color: #667085; font-weight: 700; margin-bottom: 3px; }
+    .modal-box .field-value { font-size: 14px; line-height: 1.5; }
+    .modal-box .field-value pre {
+      background: #f5f7fa; padding: 10px; border-radius: 6px;
+      white-space: pre-wrap; font-size: 13px; margin: 0;
+    }
+    .modal-box .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .modal-box .tag {
+      display: inline-flex; background: #f3f4f6; border-radius: 4px;
+      padding: 2px 8px; font-size: 12px; color: #374151;
+    }
+    .modal-box .grid-2 {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; min-height: 22px;
+      border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700;
+    }
+    .badge.urgent { background: #fee2e2; color: #b91c1c; }
+    .badge.high { background: #fef3c7; color: #b45309; }
+    .badge.normal { background: #dbeafe; color: #1e40af; }
+    .badge.low { background: #f3f4f6; color: #6b7280; }
+
+    a { color: #0f766e; font-size: 13px; cursor: pointer; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <div>
+        <h1>客服 Agent · 管理</h1>
+        <div class="sub">智能客服工单处理系统 - 对话测试 &amp; 分析历史</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="pill ok" id="llmStatus">LLM 检测中...</span>
+        <span class="pill ok" id="health">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs shell">
+    <button class="active" onclick="switchTab('chat')">🔄 对话测试</button>
+    <button onclick="switchTab('history')">📋 分析历史</button>
+  </nav>
+
+  <main class="shell">
+    <!-- ======== Tab 1: Chat ======== -->
+    <div class="tab-content active" id="tabChat">
+      <div class="config-panel">
+        <div class="config-row">
+          <div style="flex:1">
+            <label for="customerId">客户 ID</label>
+            <input id="customerId" value="C-DEMO" />
+          </div>
+          <div style="flex:1">
+            <label for="orderId">订单 ID</label>
+            <input id="orderId" value="O-DEMO" />
+          </div>
+          <div style="flex:2">
+            <label for="initialMsg">问题描述（首次发送时使用）</label>
+            <textarea id="initialMsg" rows="2" style="resize:vertical">快递显示签收了但是我没收到，物流也没人联系我。</textarea>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+            <button onclick="startNewChat()" style="border:0;border-radius:6px;background:#0f766e;color:#fff;padding:9px 16px;font-weight:700;cursor:pointer;white-space:nowrap">开始对话</button>
+            <button onclick="fillSample()" style="border:0;border-radius:6px;background:#374151;color:#fff;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer">样例</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-box" id="chatBox">
+        <div class="chat-header">
+          <span>对话</span>
+          <span class="conv-id" id="convIdLabel"></span>
+        </div>
+        <div class="chat-msgs" id="chatMsgs">
+          <div class="empty-chat">
+            <div class="icon">💬</div>
+            <div>输入客户问题，点击"开始对话"</div>
+          </div>
+          <div class="typing-indicator" id="typingIndicator">
+            <span style="font-size:13px;color:#065f46">思考中</span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input id="userInput" placeholder="输入消息..." disabled />
+          <button id="sendBtn" disabled onclick="sendMessage()">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== Tab 2: History ======== -->
+    <div class="tab-content" id="tabHistory">
+      <div class="hist-controls">
+        <button onclick="loadHistory(1)">🔄 刷新</button>
+        <span style="font-size:13px;color:#667085" id="totalLabel"></span>
+      </div>
+
+      <div class="hist-table-wrap">
+        <table class="hist-table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>客户</th>
+              <th>消息</th>
+              <th>分类</th>
+              <th>优先级</th>
+              <th>置信度</th>
+              <th>转人工</th>
+              <th>时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="histBody">
+            <tr><td colspan="9" class="hist-empty">暂无记录</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination">
+        <button id="prevBtn" onclick="loadHistory(currentPage - 1)">← 上一页</button>
+        <span id="pageInfo"></span>
+        <button id="nextBtn" onclick="loadHistory(currentPage + 1)">下一页 →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======== Detail Modal ======== -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+      <button class="close-btn" onclick="closeDetail()">&times;</button>
+      <h2 id="modalTitle">分析详情</h2>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentConvId = null;
+    let isStreaming = false;
+    let isPaused = false;
+    let currentPage = 1;
+    const PAGE_SIZE = 20;
+
+    const samples = [
+      "快递显示签收了但是我没收到，物流也没人联系我。",
+      "我这个订单还没发货，已经等了三天了，不想要了，能不能直接退款？",
+      "你们客服态度太差了，我要投诉，今天必须给我处理。",
+      "收到的商品破损了，里面配件也少了一包。",
+    ];
+
+    function fillSample() {
+      document.querySelector("#initialMsg").value = samples[Math.floor(Math.random() * samples.length)];
+    }
+
+    // ====== Tab switching ======
+    function switchTab(name) {
+      document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+      if (name === "chat") {
+        document.querySelector("nav.tabs button:nth-child(1)").classList.add("active");
+        document.querySelector("#tabChat").classList.add("active");
+      } else {
+        document.querySelector("nav.tabs button:nth-child(2)").classList.add("active");
+        document.querySelector("#tabHistory").classList.add("active");
+        loadHistory(1);
+      }
+    }
+
+    // ====== Chat ======
+    function addMsg(role, html, meta) {
+      const el = document.querySelector("#chatMsgs");
+      const empty = el.querySelector(".empty-chat");
+      if (empty) empty.remove();
+      const div = document.createElement("div");
+      div.className = "msg " + role;
+      div.innerHTML = html;
+      if (meta) {
+        const m = document.createElement("div");
+        m.className = "meta";
+        m.textContent = meta;
+        div.appendChild(m);
+      }
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function setInputState(enabled) {
+      document.querySelector("#userInput").disabled = !enabled;
+      document.querySelector("#sendBtn").disabled = !enabled;
+      if (enabled) document.querySelector("#userInput").focus();
+    }
+
+    async function startNewChat() {
+      currentConvId = null;
+      isPaused = false;
+      document.querySelector("#chatMsgs").innerHTML = "";
+      document.querySelector("#convIdLabel").textContent = "";
+      setInputState(false);
+      const msg = document.querySelector("#initialMsg").value.trim();
+      if (!msg) { addMsg("system", "请先输入问题描述"); return; }
+      await doChat(msg);
+    }
+
+    async function sendMessage() {
+      if (isPaused) {
+        const input = document.querySelector("#userInput");
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = "";
+        await doChat(msg, currentConvId);
+      }
+    }
+
+    async function doChat(message, convId) {
+      isStreaming = true;
+      isPaused = false;
+      setInputState(false);
+
+      if (!convId) {
+        addMsg("user", message, "用户");
+      } else {
+        addMsg("user", message, "用户");
+      }
+
+      const payload = {
+        message: message,
+        customer_id: document.querySelector("#customerId").value || "C-DEMO",
+        order_id: document.querySelector("#orderId").value || undefined,
+      };
+      if (convId) payload.conversation_id = convId;
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const frames = buffer.split("\n\n");
+          buffer = frames.pop() || "";
+          for (const frame of frames) {
+            const line = frame.split("\n").find(l => l.startsWith("data: "));
+            if (!line) continue;
+            const evt = JSON.parse(line.slice(6));
+            handleEvent(evt);
+          }
+        }
+      } catch (e) {
+        addMsg("system", "❌ 请求失败: " + e.message);
+      } finally {
+        if (!isPaused) {
+          setInputState(false);
+          document.querySelector("#userInput").placeholder = "对话已结束";
+        }
+        isStreaming = false;
+      }
+    }
+
+    const typingEl = document.querySelector("#typingIndicator");
+
+    function showTyping(show) {
+      typingEl.classList.toggle("show", show);
+    }
+
+    function handleEvent(evt) {
+      switch (evt.event) {
+        case "session":
+          currentConvId = evt.conversation_id;
+          document.querySelector("#convIdLabel").textContent = currentConvId;
+          break;
+        case "thought":
+          showTyping(true);
+          addMsg("thought", "🤔 " + escapeHtml(evt.content), "Agent 思考 步骤" + evt.step);
+          break;
+        case "tool_call":
+          const args = evt.args ? JSON.stringify(evt.args, null, 1) : "";
+          addMsg("tool", '<span class="label">🔧 ' + escapeHtml(evt.tool) + "</span>" + escapeHtml(args), "步骤" + evt.step);
+          break;
+        case "tool_result":
+          const data = evt.result ? JSON.stringify(evt.result.data || evt.result, null, 1) : "";
+          addMsg("tool", '<span class="label">📊 ' + escapeHtml(evt.tool) + " 返回</span>" + escapeHtml(data));
+          break;
+        case "reply":
+          showTyping(false);
+          addMsg("assistant", escapeHtml(evt.content), "Agent");
+          break;
+        case "ask_user":
+          showTyping(false);
+          addMsg("assistant", "❓ " + escapeHtml(evt.content), "Agent 提问");
+          break;
+        case "pause":
+          showTyping(false);
+          isPaused = true;
+          setInputState(true);
+          document.querySelector("#userInput").placeholder = "回复 Agent...";
+          break;
+        case "escalate":
+          showTyping(false);
+          addMsg("escalate", "⚠️ 转人工处理<br>" + escapeHtml(evt.reason) + (evt.summary ? "<br>摘要: " + escapeHtml(evt.summary) : ""));
+          break;
+        case "completed":
+          showTyping(false);
+          const statusText = evt.status === "resolved" ? "✅ 已解决" : "⏸️ 已结束";
+          addMsg("system", statusText);
+          break;
+        case "error":
+          showTyping(false);
+          addMsg("system", "❌ " + escapeHtml(evt.message || "未知错误"));
+          break;
+        case "user_response":
+          showTyping(false);
+          addMsg("user", escapeHtml(evt.content), "用户");
+          break;
+      }
+    }
+
+    // ====== History ======
+    let lastTotal = 0;
+    async function loadHistory(page) {
+      currentPage = page || 1;
+      const tbody = document.querySelector("#histBody");
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px"><span class="spinner"></span> 加载中...</td></tr>';
+
+      try {
+        const res = await fetch(`/api/analyses?page=${currentPage}&size=${PAGE_SIZE}`);
+        const body = await res.json();
+        const items = body.items || [];
+        lastTotal = body.total || 0;
+
+        document.querySelector("#totalLabel").textContent = `共 ${lastTotal} 条记录`;
+
+        if (!items.length) {
+          tbody.innerHTML = '<tr><td colspan="9" class="hist-empty">暂无记录</td></tr>';
+        } else {
+          tbody.innerHTML = items.map(item => `
+            <tr>
+              <td style="font-weight:600">${escapeHtml(item.ticket_id || item.id)}</td>
+              <td>${escapeHtml(item.customer_id || '-')}</td>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(item.message || '')}">${escapeHtml((item.message || '').slice(0, 60))}</td>
+              <td><span class="badge ${item.category || 'other'}">${item.category || '-'}</span></td>
+              <td><span class="badge ${item.priority || 'normal'}">${item.priority || '-'}</span></td>
+              <td>${item.confidence != null ? (item.confidence * 100).toFixed(0) + '%' : '-'}</td>
+              <td>${item.should_escalate ? '<span style="color:#b91c1c;font-weight:700">是</span>' : '<span style="color:#065f46">否</span>'}</td>
+              <td style="font-size:12px;color:#667085">${(item.created_at || '').slice(0, 19).replace('T', ' ')}</td>
+              <td><a onclick="openDetail(${item.id})">查看详情</a></td>
+            </tr>
+          `).join("");
+        }
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="9" class="hist-empty">加载失败: ' + escapeHtml(e.message) + '</td></tr>';
+      }
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(lastTotal / PAGE_SIZE) || 1;
+      document.querySelector("#pageInfo").textContent = `第 ${currentPage} / ${totalPages} 页`;
+      document.querySelector("#prevBtn").disabled = currentPage <= 1;
+      document.querySelector("#nextBtn").disabled = currentPage >= totalPages;
+    }
+
+    // ====== Detail Modal ======
+    async function openDetail(id) {
+      const modal = document.querySelector("#detailModal");
+      const body = document.querySelector("#modalBody");
+      body.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> 加载中...</div>';
+      modal.classList.add("show");
+
+      try {
+        const res = await fetch(`/api/analyses/${id}`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const item = await res.json();
+
+        let fullResp = null;
+        if (item.full_response) {
+          try { fullResp = JSON.parse(item.full_response); } catch {}
+        }
+
+        const ec = fullResp?.external_context || {};
+        const cls = fullResp?.classification || {};
+
+        document.querySelector("#modalTitle").textContent = `分析详情 · ${item.ticket_id || item.id}`;
+
+        body.innerHTML = `
+          <div class="grid-2">
+            <div class="field-group">
+              <div class="field-label">工单 ID</div>
+              <div class="field-value">${escapeHtml(item.ticket_id || '-')}</div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">来源</div>
+              <div class="field-value">${escapeHtml(item.source || '-')}</div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">客户 ID</div>
+              <div class="field-value">${escapeHtml(item.customer_id || '-')}</div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">订单 ID</div>
+              <div class="field-value">${escapeHtml(item.order_id || '-')}</div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">分类</div>
+              <div class="field-value">
+                <span class="badge ${item.category || 'other'}">${item.category || '-'}</span>
+                ${cls.matched_keywords ? '<div style="margin-top:4px"><span class="tag">关键词: ' + cls.matched_keywords.join('</span><span class="tag">') + '</span></div>' : ''}
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">优先级</div>
+              <div class="field-value">
+                <span class="badge ${item.priority || 'normal'}">${item.priority || '-'}</span>
+                ${cls.risk_flags ? '<div style="margin-top:4px"><span class="tag">风险: ' + cls.risk_flags.join('</span><span class="tag">') + '</span></div>' : ''}
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">置信度</div>
+              <div class="field-value">${item.confidence != null ? (item.confidence * 100).toFixed(1) + '%' : '-'}</div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">转人工</div>
+              <div class="field-value">${item.should_escalate ? '<span style="color:#b91c1c;font-weight:700">是</span>' : '<span style="color:#065f46;font-weight:700">否（自动处理）</span>'}</div>
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-top:12px">
+            <div class="field-label">客户消息</div>
+            <div class="field-value"><pre>${escapeHtml(item.message || '')}</pre></div>
+          </div>
+
+          ${fullResp?.escalation_reason ? `
+          <div class="field-group">
+            <div class="field-label">转人工原因</div>
+            <div class="field-value">${escapeHtml(fullResp.escalation_reason)}</div>
+          </div>` : ''}
+
+          <div class="field-group">
+            <div class="field-label">回复草稿</div>
+            <div class="field-value"><pre>${escapeHtml(item.reply_draft || '')}</pre></div>
+          </div>
+
+          ${fullResp?.estimated_minutes_saved != null ? `
+          <div class="field-group">
+            <div class="field-label">预估节省时间</div>
+            <div class="field-value">${fullResp.estimated_minutes_saved} 分钟</div>
+          </div>` : ''}
+
+          ${ec.customer || ec.order || ec.shipment || ec.product ? `
+          <div class="field-group">
+            <div class="field-label">外部上下文</div>
+            <div class="tags">
+              ${ec.customer ? '<span class="tag">客户: ' + escapeHtml(ec.customer.name || ec.customer.customer_id || '-') + '</span>' : ''}
+              ${ec.order ? '<span class="tag">订单: ' + escapeHtml(ec.order.status || '-') + ' ¥' + (ec.order.amount || '-') + '</span>' : ''}
+              ${ec.shipment ? '<span class="tag">物流: ' + escapeHtml(ec.shipment.carrier || '-') + ' ' + escapeHtml(ec.shipment.status || '') + '</span>' : ''}
+              ${ec.product ? '<span class="tag">商品: ' + escapeHtml(ec.product.name || '-') + '</span>' : ''}
+            </div>
+          </div>` : ''}
+
+          <div class="field-group" style="margin-top:8px;color:#667085;font-size:12px">
+            创建时间: ${(item.created_at || '').slice(0, 19).replace('T', ' ')}
+          </div>
+        `;
+      } catch (e) {
+        body.innerHTML = '<div style="color:#b91c1c;padding:20px">加载失败: ' + escapeHtml(e.message) + '</div>';
+      }
+    }
+
+    function closeDetail() {
+      document.querySelector("#detailModal").classList.remove("show");
+    }
+
+    document.querySelector("#detailModal").addEventListener("click", function(e) {
+      if (e.target === this) closeDetail();
+    });
+
+    document.querySelector("#userInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") closeDetail();
+    });
+
+    function escapeHtml(v) {
+      if (!v) return "";
+      return String(v).replace(/[&<>"']/g, function(c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c];
+      });
+    }
+
+    async function checkLlm() {
+      try {
+        const res = await fetch("/api/config/llm");
+        const cfg = await res.json();
+        const el = document.querySelector("#llmStatus");
+        if (cfg.ready) { el.textContent = "LLM " + cfg.model; el.className = "pill ok"; }
+        else if (cfg.enabled) { el.textContent = "LLM Key 未设置"; el.className = "pill warn"; }
+        else { el.textContent = "LLM 未启用"; el.className = "pill warn"; }
+      } catch {}
+    }
+
+    checkLlm();
+  </script>
+</body>
+</html>

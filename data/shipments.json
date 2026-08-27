@@ -1,0 +1,12 @@
+[
+  {"order_id": "O90002", "carrier": "顺丰", "tracking_no": "SF90002", "status": "delivered_disputed", "latest_event": "系统显示已签收，客户反馈未收到", "last_updated_at": "2026-05-08 18:30:00"},
+  {"order_id": "O90005", "carrier": "京东物流", "tracking_no": "JD90005", "status": "delivered", "latest_event": "已签收", "last_updated_at": "2026-05-03 15:22:00"},
+  {"order_id": "O90007", "carrier": "德邦", "tracking_no": "DB90007", "status": "stalled", "latest_event": "干线运输中，超过48小时未更新", "last_updated_at": "2026-05-06 09:40:00"},
+  {"order_id": "O-DEMO", "carrier": "顺丰", "tracking_no": "SFDEMO", "status": "delivered_disputed", "latest_event": "系统显示已签收，客户反馈未收到", "last_updated_at": "2026-05-08 20:10:00"},
+  {"order_id": "O90004", "carrier": "中通", "tracking_no": "ZT90004", "status": "delivered", "latest_event": "已签收，门卫代收", "last_updated_at": "2026-05-05 11:30:00"},
+  {"order_id": "O90008", "carrier": "顺丰", "tracking_no": "SF90008", "status": "delivered", "latest_event": "已签收，本人签收", "last_updated_at": "2026-05-01 16:00:00"},
+  {"order_id": "O90010", "carrier": "圆通", "tracking_no": "YT90010", "status": "in_transit", "latest_event": "到达中转站", "last_updated_at": "2026-05-06 22:00:00"},
+  {"order_id": "O90011", "carrier": "京东物流", "tracking_no": "JD90011", "status": "delivered", "latest_event": "已签收，本人签收", "last_updated_at": "2026-04-27 10:15:00"},
+  {"order_id": "O90012", "carrier": "韵达", "tracking_no": "YD90012", "status": "in_transit", "latest_event": "已揽收，正在运输中", "last_updated_at": "2026-05-07 08:30:00"},
+  {"order_id": "O90014", "carrier": "中通", "tracking_no": "ZT90014", "status": "delivered", "latest_event": "已签收，快递柜", "last_updated_at": "2026-04-30 19:20:00"}
+]

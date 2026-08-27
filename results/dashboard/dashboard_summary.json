@@ -1,0 +1,38 @@
+{
+  "config_count": 4,
+  "configs": {
+    "A0": {
+      "count": 100,
+      "avg_total": 48.69,
+      "min_total": 0.0,
+      "max_total": 92.3,
+      "gate_rate": 0.65,
+      "gate_count": 65
+    },
+    "A1": {
+      "count": 100,
+      "avg_total": 54.87,
+      "min_total": 0.0,
+      "max_total": 96.2,
+      "gate_rate": 0.61,
+      "gate_count": 61
+    },
+    "A2": {
+      "count": 100,
+      "avg_total": 58.87,
+      "min_total": 33.3,
+      "max_total": 96.2,
+      "gate_rate": 0.61,
+      "gate_count": 61
+    },
+    "A3": {
+      "count": 100,
+      "avg_total": 63.05,
+      "min_total": 39.0,
+      "max_total": 100.0,
+      "gate_rate": 0.59,
+      "gate_count": 59
+    }
+  },
+  "improvement": 14.37
+}

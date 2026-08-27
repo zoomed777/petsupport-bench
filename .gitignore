@@ -1,0 +1,41 @@
+# 密钥与敏感文件
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+venv/
+.venv/
+uv.lock
+
+# 测试与缓存
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# 数据库与运行时产物
+*.db
+*.sqlite3
+data/feedback/
+logs/
+
+# IDE 与系统文件
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 构建产物
+target/
+node_modules/

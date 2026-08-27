@@ -1,0 +1,40 @@
+{
+  "red_flag_keywords": [
+    {"keyword": "呼吸困难", "aliases": ["喘不上气", "张口呼吸", "呼吸急促", "张着嘴呼吸", "张嘴呼吸", "张嘴喘气", "喘得厉害"], "level": "emergency"},
+    {"keyword": "抽搐", "aliases": ["痉挛", "癫痫发作", "四肢僵直抖动"], "level": "emergency"},
+    {"keyword": "误食异物", "aliases": ["吞了玩具", "吃了袜子", "线团", "骨头卡住"], "level": "emergency"},
+    {"keyword": "误食毒物", "aliases": ["吃了老鼠药", "舔了消毒液", "喝了防冻液"], "level": "emergency"},
+    {"keyword": "尿闭", "aliases": ["排尿困难", "尿不出来", "频繁蹲猫砂无尿"], "level": "emergency"},
+    {"keyword": "难产", "aliases": ["生产困难", "分娩超过2小时无进展"], "level": "emergency"},
+    {"keyword": "大出血", "aliases": ["流血不止", "大量出血"], "level": "emergency"},
+    {"keyword": "严重外伤", "aliases": ["被车撞", "高处坠落", "咬伤深可见骨"], "level": "emergency"},
+    {"keyword": "误食巧克力", "aliases": ["吃了巧克力"], "level": "emergency"},
+    {"keyword": "误食百合", "aliases": ["咬了百合花", "舔了百合花粉"], "level": "emergency", "species": "cat"},
+    {"keyword": "误食木糖醇", "aliases": ["吃了木糖醇口香糖"], "level": "emergency", "species": "dog"},
+    {"keyword": "误食扑热息痛", "aliases": ["吃了对乙酰氨基酚", "吃了泰诺"], "level": "emergency", "species": "cat"},
+    {"keyword": "误食葡萄", "aliases": ["吃了葡萄", "吃了葡萄干"], "level": "emergency", "species": "dog"},
+    {"keyword": "持续呕吐", "level": "within_24h"},
+    {"keyword": "精神萎靡", "aliases": ["蔫了", "没精神"], "level": "within_24h"},
+    {"keyword": "超过24小时不进食", "aliases": ["一天没吃东西", "不吃不喝"], "level": "within_24h"}
+  ],
+  "poison_patterns": [
+    {"poison": "巧克力", "keyword": "误食巧克力", "level": "emergency", "species": ["dog", "cat"]},
+    {"poison": "木糖醇", "keyword": "误食木糖醇", "level": "emergency", "species": ["dog"]},
+    {"poison": "百合", "keyword": "误食百合", "level": "emergency", "species": ["cat"]},
+    {"poison": "洋葱", "keyword": "误食洋葱", "level": "emergency", "species": ["dog", "cat"]},
+    {"poison": "葡萄", "keyword": "误食葡萄", "level": "emergency", "species": ["dog"]},
+    {"poison": "扑热息痛", "keyword": "误食扑热息痛", "level": "emergency", "species": ["cat"]},
+    {"poison": "对乙酰氨基酚", "keyword": "误食扑热息痛", "level": "emergency", "species": ["cat"]},
+    {"poison": "老鼠药", "keyword": "误食毒物", "level": "emergency", "species": ["dog", "cat"]},
+    {"poison": "防冻液", "keyword": "误食毒物", "level": "emergency", "species": ["dog", "cat"]},
+    {"poison": "消毒液", "keyword": "误食毒物", "level": "emergency", "species": ["dog", "cat"]}
+  ],
+  "boundary_redlines": [
+    {"name": "no_diagnosis", "patterns": ["确诊", "诊断为", "得了{disease}", "就是{disease}"]},
+    {"name": "no_prescription", "patterns": ["开点{drug}", "处方", "去买{drug}吃"]},
+    {"name": "no_dosage", "patterns": ["每次{num}毫克", "每公斤{num}mg", "{num}ml每", "剂量为"]},
+    {"name": "no_human_drugs", "patterns": ["人用的{drug}", "吃人的{drug}", "人药"]}
+  ],
+  "emergency_prompt_template": "【立即就医】检测到紧急风险信号，请立即联系急诊兽医，不要等待观察。以下信息请直接提供给兽医：",
+  "disclaimer": "以上内容为健康科普与就医准备参考，不替代执业兽医诊断。"
+}

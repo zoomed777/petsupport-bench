@@ -1,0 +1,12 @@
+[
+  {"customer_id": "C1001", "name": "李女士", "segment": "standard", "lifetime_value": 860.0, "risk_level": "normal"},
+  {"customer_id": "C1002", "name": "王先生", "segment": "standard", "lifetime_value": 420.0, "risk_level": "normal"},
+  {"customer_id": "C1005", "name": "赵女士", "segment": "vip", "lifetime_value": 12800.0, "risk_level": "high"},
+  {"customer_id": "C1007", "name": "星河采购部", "segment": "enterprise", "lifetime_value": 93600.0, "risk_level": "high"},
+  {"customer_id": "C-DEMO", "name": "演示客户", "segment": "standard", "lifetime_value": 1200.0, "risk_level": "normal"},
+  {"customer_id": "C1003", "name": "张先生", "segment": "standard", "lifetime_value": 650.0, "risk_level": "normal"},
+  {"customer_id": "C1004", "name": "刘女士", "segment": "standard", "lifetime_value": 1580.0, "risk_level": "normal"},
+  {"customer_id": "C1006", "name": "陈先生", "segment": "standard", "lifetime_value": 320.0, "risk_level": "normal"},
+  {"customer_id": "C1008", "name": "周女士", "segment": "vip", "lifetime_value": 5600.0, "risk_level": "normal"},
+  {"customer_id": "C1009", "name": "吴先生", "segment": "standard", "lifetime_value": 980.0, "risk_level": "normal"}
+]
