@@ -62,7 +62,7 @@ age_map = {
     "老年（7 岁以上）": "senior",
 }
 
-pipeline = TriagePipeline()
+pipeline = TriagePipeline.from_environment()
 
 # ---------------- 主界面：输入 ----------------
 st.header("向客服提问")
@@ -138,4 +138,8 @@ if st.button("运行 Agent", type="primary") and user_message.strip():
             st.success("✅ 急诊场景已正确强制就医提示")
 
 st.divider()
-st.caption("代码仓库：PetSupport-Bench（基于 PetHub 客服系统改造，模型切换为 Hy3）")
+if pipeline.llm_generate:
+    st.success("Hy3 已连接：报告文案由 Hy3 生成，红旗分流与安全护栏由规则层强制执行。")
+else:
+    st.warning("当前为规则兜底模式：请在 .env 配置 HY3_BASE_URL、HY3_API_KEY、HY3_MODEL 后运行真实 Hy3 Demo。")
+st.caption("代码仓库：PetSupport-Bench｜个人参赛作品")

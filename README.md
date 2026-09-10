@@ -30,7 +30,7 @@ Hy3 意图路由 ──订单/物流──► ReAct 工具调用（get_order 等
 红旗规则引擎 ──命中──► 强制急诊提示 + escalate_human 升级
         │ 未命中
         ▼
-RAG 检索（bge-m3 → cross-encoder 重排）→ Hy3 生成五区块照护建议
+可追溯知识库匹配 → Hy3 生成五区块照护建议
         │
         ▼
 安全护栏校验（红线词 / 免责声明）→ 商城客服窗口输出
@@ -57,27 +57,21 @@ pip install -r requirements.txt
 cp .env.example .env
 # 编辑 .env，填入 Hy3 的 BASE_URL / API_KEY / MODEL
 
-# 3. 启动 Mock 业务 API（订单/物流/CRM，端口 8011）
-python -m app.mock_business_api
-
-# 4. 启动演示界面（Streamlit）
+# 3. 启动演示界面（Streamlit）
 streamlit run streamlit_demo.py
 ```
 
 ## 评测
 
 ```bash
-# 在 100 条评测样本集上运行完整评测（四配置消融）
-python scripts/run_ablation.py --config A0,A1,A2,A3
+# 真实 Hy3 评测：先用 30 条完成快速复现
+python scripts/run_live_eval.py --limit 30 --output results/live_A3_results.csv
 
-# 单配置评测
-python scripts/run_eval.py --config A3 --output results/full_results.csv
-
-# 人工标注界面
-streamlit run eval/human_label_ui.py
+# 完整 100 条评测（会消耗 TokenHub 配额）
+python scripts/run_live_eval.py --limit 100 --output results/live_A3_results.csv
 ```
 
-评分维度与判定标准见 [docs/evaluation_protocol.md](docs/evaluation_protocol.md)，完整实验设计见 [docs/proposal.md](docs/proposal.md)。
+评分维度与判定标准、实验设计见 [docs/proposal.md](docs/proposal.md)。开发期模拟结果与真实结果严格区分，详见 [docs/experiment_report.md](docs/experiment_report.md)。
 
 ## 目录结构
 
@@ -86,7 +80,7 @@ petsupport-bench/
 ├─ app/                    # 客服 Agent（FastAPI + ReAct + RAG + 红旗规则引擎）
 ├─ eval/                   # PetSafe-Rubric 评测框架（规则校验 + 多视角 Judge + 人工标注）
 ├─ data/
-│  ├─ cases_v1.jsonl       # 评测样本集（100 条，含难例/对抗样本）
+│  ├─ cases_v2.jsonl       # 评测样本集（100 条，含难例/对抗样本）
 │  └─ knowledge_base.jsonl # 宠物安全知识库（结构化，含来源链接）
 ├─ config/redflag_rules.json  # 红旗规则（急症关键词/中毒物清单）
 ├─ prompts/                # 意图路由 / 分诊生成 / Judge 评分提示词

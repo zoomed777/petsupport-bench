@@ -21,6 +21,7 @@ from app.guardrails.redlines import check_output, get_default_disclaimer
 from app.models.triage_schemas import CareReport, EvidenceCard, Intent, TriageLevel
 from app.triage import router as intent_router
 from app.triage import slots as slot_extractor
+from app.triage.hy3_client import Hy3TriageClient
 
 KB_PATH = Path(__file__).resolve().parents[2] / "data" / "knowledge_base.jsonl"
 
@@ -55,6 +56,18 @@ class TriagePipeline:
         self.kb = load_kb()
         self.llm_classify = llm_classify       # callable(message) -> intent str
         self.llm_generate = llm_generate       # callable(context) -> dict(五区块)
+
+    @classmethod
+    def from_environment(cls) -> "TriagePipeline":
+        """Build a Hy3-enhanced pipeline when .env is configured.
+
+        It remains fully usable without a model endpoint: deterministic safety
+        rules and templates are intentionally the fallback for local review.
+        """
+        client = Hy3TriageClient.from_env()
+        if client is None:
+            return cls()
+        return cls(llm_classify=client.classify, llm_generate=client.generate)
 
     def run(self, message: str, species: str | None = None) -> PipelineResult:
         """主入口。species 可来自宠物档案（已知则跳过追问）。"""
