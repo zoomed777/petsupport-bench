@@ -43,6 +43,10 @@ class PipelineResult:
     ask_questions: list[dict] = field(default_factory=list)   # 需要追问的问题
     route: intent_router.RouteVerdict | None = None
     redflag: dict = field(default_factory=dict)
+    collected_slots: dict = field(default_factory=dict)
+    llm_calls: list = field(default_factory=list)
+    llm_errors: list = field(default_factory=list)
+    blocked_fields: list = field(default_factory=list)
 
     @property
     def needs_clarification(self) -> bool:
@@ -56,6 +60,9 @@ class TriagePipeline:
         self.kb = load_kb()
         self.llm_classify = llm_classify       # callable(message) -> intent str
         self.llm_generate = llm_generate       # callable(context) -> dict(五区块)
+        self.client = None
+        self.errors = []
+        self.blocked = []
 
     @classmethod
     def from_environment(cls) -> "TriagePipeline":
@@ -67,11 +74,26 @@ class TriagePipeline:
         client = Hy3TriageClient.from_env()
         if client is None:
             return cls()
-        return cls(llm_classify=client.classify, llm_generate=client.generate)
+        pipeline = cls(llm_classify=client.classify, llm_generate=client.generate)
+        pipeline.client = client
+        return pipeline
 
-    def run(self, message: str, species: str | None = None) -> PipelineResult:
+    def run(self, message: str, species: str | None = None, profile: dict | None = None,
+            answers: dict | None = None, round_number: int = 0) -> PipelineResult:
         """主入口。species 可来自宠物档案（已知则跳过追问）。"""
         result = PipelineResult()
+        self.errors = []
+        self.blocked = []
+        if self.client:
+            self.client.calls.clear()
+        profile = {k: v for k, v in (profile or {}).items() if v is not None}
+        species = species or profile.get("species")
+        slot_result = slot_extractor.extract(message)
+        slot_result.slots.update(profile)
+        slot_result.slots.update({k: v for k, v in (answers or {}).items() if v})
+        if species:
+            slot_result.slots["species"] = species
+        result.collected_slots = {k: v for k, v in slot_result.slots.items() if not k.startswith("_")}
         result.route = intent_router.classify_with_fallback(message, self.llm_classify)
 
         if not result.route.needs_health_pipeline:
@@ -83,22 +105,31 @@ class TriagePipeline:
 
         if verdict.has_emergency:
             result.report = self._emergency_report(message, verdict, species)
+            result.report.intent = result.route.intent
+            result.llm_calls = list(self.client.calls) if self.client else []
+            result.llm_errors = self.errors[:]
+            result.blocked_fields = self.blocked[:]
             return result  # 急诊：立即给出报告，不追问
 
         # 2. 槽位抽取（规则层）
-        slot_result = slot_extractor.extract(message)
         required = slot_result.slots.get("_required", [])
         missing = [q for q in slot_result.missing_questions if q["slot"] in required]
         if species:  # 档案已知物种，从缺失列表剔除
             missing = [q for q in missing if q["slot"] != "species"]
 
         # 3. 关键槽位缺失 → 追问（最多 3 个问题）
-        if missing:
+        if missing and round_number < 3:
             result.ask_questions = missing[:3]
             return result
 
         # 4. 信息足够 → 生成报告
         result.report = self._generate_report(message, slot_result)
+        result.report.intent = result.route.intent
+        if missing:
+            result.report.uncertainty = "信息仍不完整：" + "、".join(q["slot"] for q in missing) + "。无法据此确定原因，请联系兽医补充评估。"
+        result.llm_calls = list(self.client.calls) if self.client else []
+        result.llm_errors = self.errors[:]
+        result.blocked_fields = self.blocked[:]
         return result
 
     # ------------------------------------------------------------------
@@ -134,12 +165,13 @@ class TriagePipeline:
         # LLM 增强（可选）：只允许润色 risk/vet_summary，不允许改变 triage_level
         if self.llm_generate:
             try:
-                enhanced = self.llm_generate({"path": "emergency", "report": report.model_dump()})
+                enhanced = self.llm_generate({"path": "emergency", "report": report.model_dump(),
+                    "knowledge": [self.kb[e.kb_id] for e in report.evidence]})
                 for k in ("risk", "vet_summary"):
                     if enhanced.get(k):
-                        setattr(report, k, enhanced[k])
-            except Exception:  # noqa: BLE001
-                pass
+                        self._safe_set(report, k, enhanced[k])
+            except Exception as exc:
+                self.errors.append(type(exc).__name__)
 
         # 护栏终检：急诊报告也不允许踩红线
         self._apply_guardrails(report)
@@ -155,7 +187,7 @@ class TriagePipeline:
             triage_level=level,
             risk=f"根据描述的症状（{self._symptom_names(symptoms)}），结合宠物档案综合判断。",
             actions=self._template_actions(symptoms),
-            warnings=["不要自行喂人用药物", "观察期间保证充足饮水"],
+            warnings=["不要自行喂人用药物", "饮食与处置按兽医意见安排，勿强行灌喂"],
             vet_summary=f"主诉：{message.strip()[:200]}",
             evidence=evidence,
             uncertainty="如症状持续或加重，请及时就诊。",
@@ -166,19 +198,27 @@ class TriagePipeline:
             try:
                 enhanced = self.llm_generate(
                     {"path": "routine", "slots": slot_result.slots,
-                     "report": report.model_dump()}
+                     "report": report.model_dump(),
+                     "knowledge": [self.kb[e.kb_id] for e in report.evidence]}
                 )
                 if isinstance(enhanced, dict):
                     for k in ("risk", "actions", "warnings", "vet_summary", "uncertainty"):
                         if enhanced.get(k):
-                            setattr(report, k, enhanced[k])
-            except Exception:  # noqa: BLE001
-                pass
+                            self._safe_set(report, k, enhanced[k])
+            except Exception as exc:
+                self.errors.append(type(exc).__name__)
 
         self._apply_guardrails(report)
         return report
 
     # ------------------------------------------------------------------
+
+    def _safe_set(self, report: CareReport, key: str, value) -> None:
+        text = "\n".join(value) if isinstance(value, list) else str(value)
+        if not check_output(text).clean:
+            self.blocked.append(key)
+            return
+        setattr(report, key, value)
 
     def _apply_guardrails(self, report: CareReport) -> None:
         """输出护栏：红线校验 + 免责声明。红线命中不删除内容（评测需要看到违规），只标记。"""
@@ -227,11 +267,10 @@ class TriagePipeline:
     def _template_actions(symptoms: list[str]) -> list[str]:
         actions = ["记录症状出现的时间、频率与变化"]
         if "vomiting" in symptoms:
-            actions += ["记录每次呕吐的时间与内容物（食物/胆汁/血丝）",
-                        "禁食观察 4-6 小时但保证饮水"]
+            actions += ["记录每次呕吐的时间与内容物，咨询兽医如何安排饮食"]
         if "diarrhea" in symptoms:
             actions += ["记录排便次数与性状（软便/水样/带血/黏液）"]
         if "anorexia" in symptoms:
-            actions += ["尝试加热罐头提升食欲，观察是否进食"]
+            actions += ["记录最后一次进食时间，联系兽医评估"]
         actions.append("若 24 小时内无改善或出现加重，预约就诊")
         return actions

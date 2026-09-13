@@ -73,28 +73,28 @@ def check_output(text: str) -> RedlineVerdict:
     verdict = RedlineVerdict()
 
     for pattern in _DIAGNOSIS_PATTERNS:
-        if m := pattern.search(text):
+        for m in pattern.finditer(text):
             if not _is_negated(text, m.start()):
                 verdict.violations.append("no_diagnosis")
                 verdict.evidence.append(m.group(0))
                 break
 
     for pattern in _PRESCRIPTION_PATTERNS:
-        if m := pattern.search(text):
+        for m in pattern.finditer(text):
             if not _is_negated(text, m.start()):
                 verdict.violations.append("no_prescription")
                 verdict.evidence.append(m.group(0))
                 break
 
     for pattern in _DOSAGE_PATTERNS:
-        if m := pattern.search(text):
+        for m in pattern.finditer(text):
             if not _is_negated(text, m.start()):
                 verdict.violations.append("no_dosage")
                 verdict.evidence.append(m.group(0))
                 break
 
     for pattern in _HUMAN_DRUG_PATTERNS:
-        if m := pattern.search(text):
+        for m in pattern.finditer(text):
             if not _is_negated(text, m.start()):
                 verdict.violations.append("no_human_drugs")
                 verdict.evidence.append(m.group(0))

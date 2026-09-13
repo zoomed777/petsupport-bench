@@ -7,10 +7,10 @@ where = ["."]
 include = ["app*"]
 
 [project]
-name = "customer-support-agent"
+name = "petsupport-bench"
 version = "0.3.0"
-description = "A measurable customer support ticket agent MVP."
-requires-python = ">=3.9"
+description = "Personal Hy3 competition prototype for pet support and auditable evaluation."
+requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.110.0",
     "httpx>=0.27.0",

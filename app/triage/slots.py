@@ -117,7 +117,7 @@ def extract(message: str) -> SlotResult:
 
     if m := _INGESTION.search(message):
         result.slots["possible_ingestion"] = True
-        item = m.group(3)
+        item = m.group(4)
         if item:
             result.slots["ingested_item"] = item
             if m.group(2):
@@ -128,8 +128,9 @@ def extract(message: str) -> SlotResult:
     if m := _FREQUENCY.search(message):
         result.slots["frequency"] = m.group(0)
     if m := _WEIGHT.search(message):
-        result.slots["weight_kg"] = float(m.group(1))
-        result.pet.weight_kg = float(m.group(1))
+        kg = float(m.group(1)) / (2 if "斤" in m.group(0) else 1)
+        result.slots["weight_kg"] = kg
+        result.pet.weight_kg = kg
 
     for key, terms in {
         "appetite": ["不吃", "食欲", "挑食", "能吃"],

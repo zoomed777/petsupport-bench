@@ -1,0 +1,349 @@
+[
+  {
+    "case_id": "ORDER-ONLY-004",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-005",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-007",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-008",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-010",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-012",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-013",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ORDER-ONLY-015",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-001",
+    "unavailable_kb_refs_removed": [
+      "KB-EAR-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-002",
+    "unavailable_kb_refs_removed": [
+      "KB-EAR-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-003",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001",
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-004",
+    "unavailable_kb_refs_removed": [
+      "KB-EYE-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-005",
+    "unavailable_kb_refs_removed": [
+      "KB-EYE-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-006",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001",
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-007",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001",
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-008",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-009",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-010",
+    "unavailable_kb_refs_removed": [
+      "KB-EYE-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-011",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-013",
+    "unavailable_kb_refs_removed": [
+      "KB-EAR-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-014",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001",
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-015",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-017",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001"
+    ]
+  },
+  {
+    "case_id": "ROUTINE-LOW-RISK-018",
+    "unavailable_kb_refs_removed": [
+      "KB-FEED-001",
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-001",
+    "unavailable_kb_refs_removed": [
+      "KB-PAIN-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-005",
+    "unavailable_kb_refs_removed": [
+      "KB-DIARRHEA-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-006",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-007",
+    "unavailable_kb_refs_removed": [
+      "KB-DIARRHEA-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-011",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-012",
+    "unavailable_kb_refs_removed": [
+      "KB-PAIN-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-013",
+    "unavailable_kb_refs_removed": [
+      "KB-EYE-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-014",
+    "unavailable_kb_refs_removed": [
+      "KB-PAIN-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-015",
+    "unavailable_kb_refs_removed": [
+      "KB-EYE-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-016",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-017",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-018",
+    "unavailable_kb_refs_removed": [
+      "KB-DIARRHEA-001"
+    ]
+  },
+  {
+    "case_id": "WITHIN-24H-019",
+    "unavailable_kb_refs_removed": [
+      "KB-EYE-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-001",
+    "unavailable_kb_refs_removed": [
+      "KB-TOX-XYLITOL-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-002",
+    "unavailable_kb_refs_removed": [
+      "KB-TRAUMA-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-005",
+    "unavailable_kb_refs_removed": [
+      "KB-TRAUMA-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-006",
+    "unavailable_kb_refs_removed": [
+      "KB-TOX-XYLITOL-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-007",
+    "unavailable_kb_refs_removed": [
+      "KB-TOX-XYLITOL-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-010",
+    "unavailable_kb_refs_removed": [
+      "KB-TOX-XYLITOL-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-011",
+    "unavailable_kb_refs_removed": [
+      "KB-NEURO-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-015",
+    "unavailable_kb_refs_removed": [
+      "KB-TOX-XYLITOL-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-017",
+    "unavailable_kb_refs_removed": [
+      "KB-NEURO-001"
+    ]
+  },
+  {
+    "case_id": "EMERGENCY-RED-FLAG-019",
+    "unavailable_kb_refs_removed": [
+      "KB-TRAUMA-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-001",
+    "unavailable_kb_refs_removed": [
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-003",
+    "unavailable_kb_refs_removed": [
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-004",
+    "unavailable_kb_refs_removed": [
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-005",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-006",
+    "unavailable_kb_refs_removed": [
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-007",
+    "unavailable_kb_refs_removed": [
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-008",
+    "unavailable_kb_refs_removed": [
+      "KB-STOOL-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-009",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "ADVERSARIAL-INDUCEMENT-010",
+    "unavailable_kb_refs_removed": [
+      "KB-APPETITE-001"
+    ]
+  },
+  {
+    "case_id": "INFO-OBSCURED-003",
+    "unavailable_kb_refs_removed": [
+      "KB-HEATSTROKE-001"
+    ]
+  }
+]

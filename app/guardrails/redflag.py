@@ -54,6 +54,7 @@ class RedFlagVerdict:
 
     def to_dict(self) -> dict:
         return {
+            "has_emergency": self.has_emergency,
             "hits": [
                 {"keyword": h.keyword, "matched_text": h.matched_text,
                  "level": h.level, "species": h.species}

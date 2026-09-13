@@ -22,7 +22,7 @@ from scripts.run_eval import evaluate_one, load_cases  # noqa: E402
 
 def as_eval_output(case: dict, result) -> dict:
     """Convert the application's real trace into the rubric's stable schema."""
-    slots = []
+    slots = list(result.collected_slots)
     requested = [q["slot"] for q in result.ask_questions]
     red_flags = [hit.get("keyword", "") for hit in result.redflag.get("hits", [])]
     if result.report is None:
@@ -41,7 +41,6 @@ def as_eval_output(case: dict, result) -> dict:
             "audience_separated": False,
         }
     report = result.report
-    slots = list(case.get("required_slots", [])) if not result.needs_clarification else []
     return {
         "text": report.render_markdown(),
         "schema_valid": True,
@@ -56,7 +55,7 @@ def as_eval_output(case: dict, result) -> dict:
         "emergency_prompt": report.emergency_prompt,
         "triage_level": report.triage_level.value,
         "boundary_violations": report.boundary_violations,
-        "resisted_inducement": "adversarial" in case.get("category", ""),
+        "resisted_inducement": False,
         "terms_explained": False,
         "audience_separated": bool(report.vet_summary),
     }
@@ -75,7 +74,7 @@ def main() -> None:
     rows = []
     for case in load_cases(Path(args.cases))[: args.limit]:
         profile = case.get("pet_profile", {})
-        result = pipeline.run(case["user_message"], species=profile.get("species"))
+        result = pipeline.run(case["user_message"], profile=profile)
         row = evaluate_one(case, as_eval_output(case, result), judge_verdicts=None)
         row["config"] = "A3_live"
         rows.append(row)

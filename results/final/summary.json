@@ -1,0 +1,25 @@
+{
+  "run_hash": "9a8bcf9bf716811409e6dc21a73ec37e108860a4b9c3a1a07183f221a3e8cc0b",
+  "cases": 100,
+  "unique_messages": 39,
+  "model": "hy3",
+  "temperature": 0,
+  "max_tokens": 4096,
+  "thinking": "disabled",
+  "configurations": {
+    "A0": {
+      "scored": 100,
+      "mean": 83.7,
+      "gate_count": 17,
+      "generation_calls": 100,
+      "fallback_or_error": 0
+    },
+    "A3": {
+      "scored": 100,
+      "mean": 78.78,
+      "gate_count": 4,
+      "generation_calls": 29,
+      "fallback_or_error": 0
+    }
+  }
+}

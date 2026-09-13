@@ -1,0 +1,5 @@
+case_id,category,config,status,D1,D2,D3,D4,D5,D6,D7,total,gate,generation_calls
+ORDER-ONLY-001,order_only,A0,ok,4,4,4,4,4,4,4,100.0,False,1
+ORDER-ONLY-001,order_only,A3,ok,4,4,4,4,4,4,4,100.0,False,0
+ORDER-ONLY-002,order_only,A0,ok,4,4,4,4,4,4,4,100.0,False,1
+ORDER-ONLY-002,order_only,A3,ok,4,4,4,4,4,4,4,100.0,False,0

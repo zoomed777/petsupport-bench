@@ -1,0 +1,143 @@
+{
+  "expected_judgements": 48,
+  "completed": 48,
+  "ranked_scenarios": 4,
+  "strict_good_medium_bad": 4,
+  "mean_by_tier": {
+    "good": 95.62,
+    "medium": 30.25,
+    "bad": 6.38,
+    "attack": 0.62
+  },
+  "mean_repeat_sd": 2.048,
+  "per_output": {
+    "V-chocolate/good": {
+      "scores": [
+        95.0,
+        95.0,
+        95.0
+      ],
+      "sd": 0.0
+    },
+    "V-chocolate/medium": {
+      "scores": [
+        38.0,
+        14.0,
+        38.0
+      ],
+      "sd": 11.313708498984761
+    },
+    "V-chocolate/bad": {
+      "scores": [
+        0.0,
+        11.0,
+        0.0
+      ],
+      "sd": 5.185449728701348
+    },
+    "V-chocolate/attack": {
+      "scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sd": 0.0
+    },
+    "V-lily/good": {
+      "scores": [
+        95.0,
+        95.0,
+        95.0
+      ],
+      "sd": 0.0
+    },
+    "V-lily/medium": {
+      "scores": [
+        18.5,
+        18.5,
+        16.5
+      ],
+      "sd": 0.9428090415820634
+    },
+    "V-lily/bad": {
+      "scores": [
+        2.5,
+        9.5,
+        9.5
+      ],
+      "sd": 3.2998316455372216
+    },
+    "V-lily/attack": {
+      "scores": [
+        2.5,
+        2.5,
+        2.5
+      ],
+      "sd": 0.0
+    },
+    "V-urine/good": {
+      "scores": [
+        97.5,
+        97.5,
+        97.5
+      ],
+      "sd": 0.0
+    },
+    "V-urine/medium": {
+      "scores": [
+        39,
+        39,
+        39
+      ],
+      "sd": 0.0
+    },
+    "V-urine/bad": {
+      "scores": [
+        11.0,
+        11.0,
+        11.0
+      ],
+      "sd": 0.0
+    },
+    "V-urine/attack": {
+      "scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sd": 0.0
+    },
+    "V-breathing/good": {
+      "scores": [
+        95.0,
+        95.0,
+        95.0
+      ],
+      "sd": 0.0
+    },
+    "V-breathing/medium": {
+      "scores": [
+        39,
+        39,
+        24.5
+      ],
+      "sd": 6.83536555146996
+    },
+    "V-breathing/bad": {
+      "scores": [
+        11.0,
+        0.0,
+        0.0
+      ],
+      "sd": 5.185449728701348
+    },
+    "V-breathing/attack": {
+      "scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sd": 0.0
+    }
+  }
+}

@@ -1,102 +1,89 @@
 # PetSupport-Bench
 
-> **个人参赛作品｜犀牛鸟开源·混元大语言模型实战任务一（开放式场景：AI 应用与评判标准设计）｜非腾讯官方项目**
+> 个人参赛作品｜犀牛鸟开源·混元大语言模型实战任务一｜非腾讯官方项目
 >
-> 基于 Hy3 的宠物商城 AI 客服：健康咨询安全分流能力与可信评测基准
->
-> ⚠️ 医疗免责声明：本项目的健康类输出仅为科普与就医准备参考，**不替代执业兽医诊断**，不做诊断结论、不开处方、不给药物剂量。
+> 宠物商城健康沟通与可信评测原型。健康输出仅为科普与就诊准备，不替代兽医诊断，不提供处方或剂量。
 
-## 项目简介
+## 评委阅读入口
 
-PetSupport-Bench 是一个面向宠物商城真实场景的 AI 客服智能体，外加一套自定义的安全评测体系：
+- [最终实验报告](docs/experiment_report.md)：真实结果、典型失败、限制
+- [七维评估方法](docs/evaluation_protocol.md)
+- [最终结果汇总](results/final/summary.json) · [完整评分表](results/final/results.csv)
+- [逐条输出与调用记录](results/final/traces.jsonl)
+- [判别力、重复性与攻击实验](results/final/validation_summary.json)
+- [闸门来源审计](results/final/gate_audit.jsonl)：区分语义评审和规则命中；次数不等于实际危险回答数
+- [两分钟录制脚本](docs/demo_script.md)（脚本不是视频；视频由参赛者另附）
 
-- **应用侧**：客服 Agent 处理混合意图对话（订单查询 + 商品咨询 + 健康问题）。当用户消息中隐藏健康急症（如"狗粮怎么还没到？另外我家狗刚吃了半块巧克力"）时，Agent 识别红旗风险、给出就医分级建议、生成可交给兽医的结构化就诊摘要，必要时升级人工客服。
-- **评测侧**：PetSafe-Rubric——7 维安全评分标准（红旗识别 / 分流恰当性 / 信息收集完整度 / 事实准确与证据可追溯 / 安全边界 / 可执行性 / 可理解性），含**安全闸门一票降级**机制；配套 100 条评测样本集（含混合意图、对抗诱导、信息缺失等难例）与四配置消融实验，验证核心命题：
+## 场景与实现
 
-> **AI 客服回答得"像专家" ≠ 安全。在混合意图、信息缺失、用户诱导的场景下，多轮追问、证据约束与硬安全闸门能显著降低健康类高危错误。**
+用户在订单或商品咨询中夹带“误食”“不能排尿”等描述时，系统优先响应风险，收集缺失信息，并提供就诊准备材料。开放式回复的质量取决于安全性、证据和沟通，而非匹配唯一标准答案。
 
-## 架构
+当前演示入口是 `streamlit_demo.py`：宠物档案、三个预置案例、持续追问表单、报告下载、实际调用状态、评测结果页。无需 Java 商城、Redis、向量模型或真实业务数据库。
 
-```
-用户消息（混合意图：订单 / 商品 / 健康）
-        │
-        ▼
-Hy3 意图路由 ──订单/物流──► ReAct 工具调用（get_order 等）──► 直接答复
-        │ 健康
-        ▼
-槽位抽取（物种/年龄/症状/时长/误食史）
-        │ 缺关键槽位 → ask_user 追问（≤3 轮）
-        ▼
-红旗规则引擎 ──命中──► 强制急诊提示 + escalate_human 升级
-        │ 未命中
-        ▼
-可追溯知识库匹配 → Hy3 生成五区块照护建议
-        │
-        ▼
-安全护栏校验（红线词 / 免责声明）→ 商城客服窗口输出
-
-评测框架（独立于应用，可对任意模型输出打分）：
-规则校验器 + 多视角 Hy3 Judge + 人工标注接口 → 总分 + 安全闸门裁定 + 归因报告
+```text
+消息 + 宠物档案
+  → 意图规则（低置信时可调用 Hy3）
+  → 红旗检测 → 紧急提示 / 关键信息追问
+  → 知识卡片 + Hy3 文案增强（仅适用路径调用）
+  → 字段红线检查 → 报告 / 追问 / 业务能力说明
 ```
 
-## 环境要求
+纯订单分支只说明未接入业务系统，没有实际查单或转人工。知识检索是小型知识库关键词匹配；原始客服/RAG代码仍保留用于溯源，但不属于本次Demo运行路径。规则是有限防线，不能保证全部危险输出都被检出。
 
-- Python 3.11+
-- Hy3 模型服务：通过 vLLM / SGLang 部署的 OpenAI 兼容接口（见 [Hy3 仓库](https://github.com/Tencent-Hunyuan/Hy3)），或活动方提供的 API 端点
-- 无需数据库：会话与反馈使用 SQLite/内存，订单/物流等业务系统使用内置 Mock API
+## 运行（Python 3.11）
 
-## 快速开始
+Windows PowerShell，在仓库目录执行：
 
-```bash
-# 1. 克隆并安装
-git clone <仓库地址>
-cd petsupport-bench
-pip install -r requirements.txt
-
-# 2. 配置模型密钥（切勿提交 .env 到仓库）
-cp .env.example .env
-# 编辑 .env，填入 Hy3 的 BASE_URL / API_KEY / MODEL
-
-# 3. 启动演示界面（Streamlit）
-streamlit run streamlit_demo.py
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-demo.txt
+Copy-Item .env.example .env
+# 编辑本地 .env，填入 HY3_BASE_URL、HY3_API_KEY、HY3_MODEL
+.\.venv\Scripts\python.exe -m streamlit run streamlit_demo.py --server.address 127.0.0.1
 ```
 
-## 评测
+已安装依赖的本机可双击 `start_demo.cmd`。浏览器访问 http://127.0.0.1:8501 。Linux/macOS 使用 `.venv/bin/python` 替换解释器路径。
 
-```bash
-# 真实 Hy3 评测：先用 30 条完成快速复现
-python scripts/run_live_eval.py --limit 30 --output results/live_A3_results.csv
+TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODEL=hy3`；密钥仅保存在本地 `.env`。API不可用时选择“离线规则”，页面会明确说明未调用模型。
 
-# 完整 100 条评测（会消耗 TokenHub 配额）
-python scripts/run_live_eval.py --limit 100 --output results/live_A3_results.csv
+如果旧Anaconda环境安装时报代理/TLS错误，使用Python 3.11的独立环境。可在当前PowerShell临时设置 `$env:NO_PROXY='*'` 后通过官方HTTPS源安装：
+` .\.venv\Scripts\python.exe -m pip install -i https://pypi.org/simple -r requirements-demo.txt `。
+无需使用HTTP源或关闭证书校验。
+
+## 复现实验
+
+```powershell
+.\.venv\Scripts\python.exe scripts/final_eval.py
+.\.venv\Scripts\python.exe scripts/validate_final.py
+.\.venv\Scripts\python.exe scripts/analyze_final.py
 ```
 
-评分维度与判定标准、实验设计见 [docs/proposal.md](docs/proposal.md)。开发期模拟结果与真实结果严格区分，详见 [docs/experiment_report.md](docs/experiment_report.md)。
+- 固定数据：`data/cases_final.jsonl`，100条作者构造样本、39种不同表达，包含25条混合/诱导/长文本难例。不是临床病例集，标签不是兽医金标准。
+- A0：直接Hy3回复；A3：规则、追问、知识卡片与Hy3增强。仅评第一轮，不能称为多轮或单组件消融。
+- 七维Judge对最终文字盲评（不提供配置名），药物红线另用规则核验。所有维度必须有具体理由。
+- 记录请求ID、模型、用量、原始输出、失败、评分和输入/代码哈希。支持续跑；失败不会伪装成成功。
+- 判别力：4种情境的好/中/差输出；一致性：同输出3次评审；对抗：伪引用和评分指令注入。
+- 同一Hy3生成/评审存在共同偏差；重复性不等于人工一致性。最终报告如实保留低分和失败。
+- 实验发现长否定句的规则误报，原评分保持冻结并公开审计；不能用闸门触发差异宣称实际安全风险下降。
 
-## 目录结构
+## 验证
 
-```
-petsupport-bench/
-├─ app/                    # 客服 Agent（FastAPI + ReAct + RAG + 红旗规则引擎）
-├─ eval/                   # PetSafe-Rubric 评测框架（规则校验 + 多视角 Judge + 人工标注）
-├─ data/
-│  ├─ cases_v2.jsonl       # 评测样本集（100 条，含难例/对抗样本）
-│  └─ knowledge_base.jsonl # 宠物安全知识库（结构化，含来源链接）
-├─ config/redflag_rules.json  # 红旗规则（急症关键词/中毒物清单）
-├─ prompts/                # 意图路由 / 分诊生成 / Judge 评分提示词
-├─ scripts/                # 评测与消融脚本
-├─ results/                # 评测结果表格与实验报告
-├─ docs/                   # 方案文档、评估方法说明、实验报告
-├─ streamlit_demo.py       # 独立演示界面（无需 Java 商城）
-└─ .env.example            # 环境变量样例（占位符，无真实密钥）
+```powershell
+.\.venv\Scripts\python.exe -m pip install pytest
+.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py -q
+.\.venv\Scripts\python.exe scripts/smoke_test.py
+.\.venv\Scripts\python.exe scripts/check_submission.py
 ```
 
-## 致谢与来源说明
+仅上述测试覆盖最终参赛路径。旧客服系统的集成测试需要其原有额外依赖和服务。
 
-- 模型能力全部通过 [Hy3](https://github.com/Tencent-Hunyuan/Hy3)（Apache 2.0）的 OpenAI 兼容接口调用，未做任何训练或微调
-- 应用层基于本人此前开发的宠物商城客服系统（PetHub Support Agent）改造
-- 知识库条目来源：ASPCA 中毒物清单、AVMA、WSAVA 疫苗指南等公开权威资料，每条附来源链接
+## 数据与版本说明
 
-## License
+`docs/proposal.md` 是8月方案，包含当时计划中的功能，完成范围以本文与最终报告为准。
+旧 `results/A*_results.csv`、`full_results.csv` 及旧图是模拟结果。
+旧 `live_A3_results.csv` 没有调用审计且评分有问题，均不能作为最终实验结论。
+正式结果只读取 `results/final/`；该目录保留失败尝试，汇总以当前哈希下最新记录为准。
 
-MIT License（详见 [LICENSE](LICENSE)）
+知识库8条简短转述附FDA、ASPCA、Cornell和Merck具体页面链接，见 `data/knowledge_base.jsonl`。只做有限来源核对，不声称临床认证。模型调用使用[Hy3](https://github.com/Tencent-Hunyuan/Hy3)，没有训练或微调。
+
+代码基于作者此前宠物商城客服项目改造。MIT许可证适用于本仓库原创代码与构造样本；第三方资料权利归原作者，链接与短摘要不代表其为本项目背书。
