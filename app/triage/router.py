@@ -13,6 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.models.triage_schemas import Intent
+from app.triage.slots import detect_symptoms
 
 _ORDER_KEYWORDS = [
     "订单", "发货", "物流", "快递", "退换", "退款", "退货", "取消订单",
@@ -49,6 +50,8 @@ def classify(message: str) -> RouteVerdict:
         "product": [k for k in _PRODUCT_KEYWORDS if k in message],
         "health": [k for k in _HEALTH_KEYWORDS if k in message],
     }
+    # The slot extractor must not recognize symptoms that routing then drops.
+    matched["health"].extend("symptom:" + symptom for symptom in detect_symptoms(message))
     has_order = bool(matched["order"] or matched["product"])
     has_health = bool(matched["health"])
 

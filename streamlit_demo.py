@@ -57,6 +57,10 @@ with tab_app:
         run_current()
     result = st.session_state.get("result")
     if result and result.ask_questions:
+        if result.route and result.route.intent.value == "mixed":
+            st.info("已识别到订单/商品咨询中包含健康描述，先补充宠物情况。订单部分未接入真实系统，需要由商城客服核实。")
+        else:
+            st.info("已识别到健康描述；信息还不够，先补充以下问题，再继续生成反馈。")
         st.subheader("请补充关键信息")
         st.caption("已填信息会保留；若出现呼吸困难、抽搐、不能排尿，请立即联系急诊兽医，不必等答完问题。")
         with st.form("followup"):
@@ -92,6 +96,7 @@ with tab_eval:
     if path.exists():
         summary = json.loads(path.read_text(encoding="utf-8"))
         st.subheader("真实 A0/A3 对比")
+        st.caption("冻结实验版本：6368460。后续路由修复仅做回归验证，此处不是修复版重新评测的成绩。")
         st.caption("构造场景、单模型自动评审；没有人工/兽医标注，不代表临床安全认证。")
         for col, (name, info) in zip(st.columns(2), summary["configurations"].items()):
             col.metric(name + " 平均分", info["mean"])

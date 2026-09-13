@@ -59,3 +59,35 @@ def test_streamlit_followup_form():
         assert not a.exception
         assert len(a.text_input)==3
         assert any(b.label=='提交补充信息' for b in a.button)
+
+
+def test_mixed_appetite_description_is_not_dropped():
+    from app.triage.router import classify
+    for symptom in ['食欲不好', '胃口不佳', '吃得很少', '吐了', '干呕']:
+        message='换的猫粮什么时候到？我家猫最近'+symptom
+        assert classify(message).intent.value == 'mixed'
+        result=TriagePipeline().run(message)
+        assert result.ask_questions or result.report
+        assert result.collected_slots.get('symptom')
+    result=TriagePipeline().run('换的猫粮什么时候到？我家猫最近食欲不好')
+    assert result.collected_slots['symptom'] == ['anorexia']
+    assert [q['slot'] for q in result.ask_questions] == ['age', 'duration', 'mental_state']
+    assert classify('换的猫粮什么时候到？').intent.value == 'order'
+
+
+def test_screenshot_case_has_visible_feedback_and_followup():
+    from streamlit.testing.v1 import AppTest
+    with patch('app.triage.pipeline.TriagePipeline.from_environment',return_value=TriagePipeline()):
+        a=AppTest.from_file(Path(__file__).resolve().parents[1]/'streamlit_demo.py',default_timeout=30).run()
+        a.radio[0].set_value('离线规则').run()
+        a.text_area[0].set_value('换的猫粮什么时候到？我家猫最近食欲不好')
+        next(b for b in a.button if b.label=='运行 Agent').click().run()
+        assert not a.exception
+        assert any('包含健康描述' in item.value for item in a.info)
+        assert len(a.text_input)==3
+        for field, value in zip(a.text_input, ['成年，3岁', '今天上午开始', '精神正常']):
+            field.set_value(value)
+        next(b for b in a.button if b.label=='提交补充信息').click().run()
+        assert not a.exception
+        assert not a.text_input
+        assert any('食欲下降' in item.value for item in a.markdown)

@@ -29,7 +29,8 @@ _AGE = {"幼猫": "juvenile", "小猫": "juvenile", "幼犬": "juvenile", "小�
 _SYMPTOMS = {
     "vomiting": ["呕吐", "吐了", "吐了两次", "干呕"],
     "diarrhea": ["拉稀", "腹泻", "软便", "便溏"],
-    "anorexia": ["不吃", "不进食", "食欲下降", "挑食", "不碰"],
+    "anorexia": ["不吃", "不进食", "食欲下降", "食欲不好", "食欲不佳", "食欲差",
+                 "胃口不好", "胃口不佳", "没胃口", "吃得少", "吃的少", "吃得很少", "挑食", "不碰"],
     "lethargy": ["没精神", "精神萎靡", "蔫", "精神不好", "不爱动"],
     "dyspnea": ["喘", "呼吸困难", "张口呼吸", "呼吸急促"],
     "urinary": ["尿不出来", "尿闭", "排尿困难", "蹲猫砂"],
@@ -93,6 +94,11 @@ def required_slots_for(symptoms: list[str]) -> list[str]:
     return _REQUIRED_SLOTS["default"]
 
 
+def detect_symptoms(message: str) -> list[str]:
+    """Share symptom vocabulary with routing so health signals are not discarded."""
+    return [sym for sym, terms in _SYMPTOMS.items() if any(t in message for t in terms)]
+
+
 def extract(message: str) -> SlotResult:
     """规则层槽位抽取。"""
     result = SlotResult()
@@ -108,10 +114,7 @@ def extract(message: str) -> SlotResult:
             result.pet.age = age
             break
 
-    symptoms = []
-    for sym, terms in _SYMPTOMS.items():
-        if any(t in message for t in terms):
-            symptoms.append(sym)
+    symptoms = detect_symptoms(message)
     if symptoms:
         result.slots["symptom"] = symptoms
 

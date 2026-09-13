@@ -79,6 +79,8 @@ TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODE
 
 ## 数据与版本说明
 
+最终批量评测对应提交 `6368460`。此后的演示修复补充了“食欲不好”等表达的混合意图识别，并增加原句端到端回归测试（见 [修复验证](docs/bugfix_regression.md)）；未对修复版重新运行整套在线评测，因此原分数只代表冻结实验版本，不能作为修复版的新成绩。
+
 `docs/proposal.md` 是8月方案，包含当时计划中的功能，完成范围以本文与最终报告为准。
 旧 `results/A*_results.csv`、`full_results.csv` 及旧图是模拟结果。
 旧 `live_A3_results.csv` 没有调用审计且评分有问题，均不能作为最终实验结论。
