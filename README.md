@@ -6,13 +6,14 @@
 
 ## 评委阅读入口
 
+- [观看演示视频（MP4，约68秒）](demo/demo.mp4)
 - [最终实验报告](docs/experiment_report.md)：真实结果、典型失败、限制
 - [七维评估方法](docs/evaluation_protocol.md)
 - [最终结果汇总](results/final/summary.json) · [完整评分表](results/final/results.csv)
 - [逐条输出与调用记录](results/final/traces.jsonl)
 - [判别力、重复性与攻击实验](results/final/validation_summary.json)
 - [闸门来源审计](results/final/gate_audit.jsonl)：区分语义评审和规则命中；次数不等于实际危险回答数
-- [两分钟录制脚本](docs/demo_script.md)（脚本不是视频；视频由参赛者另附）
+- [演示录制脚本](docs/demo_script.md)（实际视频见上方链接）
 
 ## 场景与实现
 
