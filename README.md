@@ -18,10 +18,10 @@
 
 用户在订单或商品咨询中夹带“误食”“不能排尿”等描述时，系统优先响应风险，收集缺失信息，并提供就诊准备材料。开放式回复的质量取决于安全性、证据和沟通，而非匹配唯一标准答案。
 
-当前演示入口是 `streamlit_demo.py`：宠物档案、三个预置案例、持续追问表单、报告下载、实际调用状态、评测结果页。无需 Java 商城、Redis、向量模型或真实业务数据库。
+当前演示入口是 `streamlit_demo.py`：直接输入自然语言的聊天窗口、自动意图识别、对话内追问、历史消息、报告下载及折叠调用记录。无需选择场景类型或填写宠物档案表单，也无需 Java 商城、Redis、向量模型或真实业务数据库。聊天适配与验证见 [聊天交互说明](docs/chat_demo.md)。
 
 ```text
-消息 + 宠物档案
+用户消息 + 本次对话内已提供的信息
   → 意图规则（低置信时可调用 Hy3）
   → 红旗检测 → 紧急提示 / 关键信息追问
   → 知识卡片 + Hy3 文案增强（仅适用路径调用）
@@ -44,7 +44,7 @@ Copy-Item .env.example .env
 
 已安装依赖的本机可双击 `start_demo.cmd`。浏览器访问 http://127.0.0.1:8501 。Linux/macOS 使用 `.venv/bin/python` 替换解释器路径。
 
-TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODEL=hy3`；密钥仅保存在本地 `.env`。API不可用时选择“离线规则”，页面会明确说明未调用模型。
+TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODEL=hy3`；密钥仅保存在本地 `.env`。默认在线，API不可用时可在侧栏“开发与演示设置”选择“离线规则”，每轮实际调用情况会在回复下方说明。
 
 如果旧Anaconda环境安装时报代理/TLS错误，使用Python 3.11的独立环境。可在当前PowerShell临时设置 `$env:NO_PROXY='*'` 后通过官方HTTPS源安装：
 ` .\.venv\Scripts\python.exe -m pip install -i https://pypi.org/simple -r requirements-demo.txt `。

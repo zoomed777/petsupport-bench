@@ -49,16 +49,19 @@ def test_judge_rejects_missing_dimension():
     with pytest.raises(ValueError):
         judge(Client(),{'user_message':'test'},'test',[])
 
-def test_streamlit_followup_form():
+def test_streamlit_chat_followup():
     from streamlit.testing.v1 import AppTest
     with patch('app.triage.pipeline.TriagePipeline.from_environment',return_value=TriagePipeline()):
         a=AppTest.from_file(Path(__file__).resolve().parents[1]/'streamlit_demo.py',default_timeout=30).run()
         a.radio[0].set_value('离线规则').run()
-        a.text_area[0].set_value('我家猫有点拉稀')
-        next(b for b in a.button if b.label=='运行 Agent').click().run()
+        a.chat_input[0].set_value('我家猫有点拉稀').run()
         assert not a.exception
-        assert len(a.text_input)==3
-        assert any(b.label=='提交补充信息' for b in a.button)
+        assert not a.text_input and not a.selectbox
+        assert len(a.session_state['chat_session'].pending)==3
+        a.chat_input[0].set_value('成年3岁，今天上午开始，拉了两次，食欲正常，精神正常。').run()
+        assert not a.exception
+        assert not a.session_state['chat_session'].pending
+        assert len(a.session_state['chat_messages'])==4
 
 
 def test_mixed_appetite_description_is_not_dropped():
@@ -80,14 +83,56 @@ def test_screenshot_case_has_visible_feedback_and_followup():
     with patch('app.triage.pipeline.TriagePipeline.from_environment',return_value=TriagePipeline()):
         a=AppTest.from_file(Path(__file__).resolve().parents[1]/'streamlit_demo.py',default_timeout=30).run()
         a.radio[0].set_value('离线规则').run()
-        a.text_area[0].set_value('换的猫粮什么时候到？我家猫最近食欲不好')
-        next(b for b in a.button if b.label=='运行 Agent').click().run()
+        a.chat_input[0].set_value('换的猫粮什么时候到？我家猫最近食欲不好').run()
         assert not a.exception
-        assert any('包含健康描述' in item.value for item in a.info)
-        assert len(a.text_input)==3
-        for field, value in zip(a.text_input, ['成年，3岁', '今天上午开始', '精神正常']):
-            field.set_value(value)
-        next(b for b in a.button if b.label=='提交补充信息').click().run()
+        assert any('订单和健康两件事' in item.value for item in a.markdown)
+        assert not a.selectbox and not a.text_input
+        a.chat_input[0].set_value('它3岁，今天上午开始，精神正常').run()
         assert not a.exception
         assert not a.text_input
         assert any('食欲下降' in item.value for item in a.markdown)
+        next(b for b in a.button if b.label=='开始新对话').click().run()
+        assert a.session_state['chat_messages']==[]
+        assert a.session_state['chat_session'].user_turns==[]
+
+
+def test_chat_does_not_accept_invented_followup_facts():
+    from app.chat_session import ChatSession
+    chat=ChatSession()
+    chat.reply('我家猫食欲不好',TriagePipeline())
+    class Client:
+        calls=[]
+        def _complete(self,*_):
+            return '{"answers":[{"slot":"age","quote":"成年"},{"slot":"mental_state","quote":"正常"}]}'
+    p=TriagePipeline()
+    p.client=Client()
+    chat.reply('不知道年龄，精神正常',p)
+    assert 'age' not in chat.answers
+    assert chat.answers['mental_state']=='正常'
+    assert 'age' in [q['slot'] for q in chat.pending]
+
+
+def test_chat_emergency_interrupts_followup_without_extraction():
+    from app.chat_session import ChatSession
+    chat=ChatSession()
+    chat.reply('我家猫拉稀',TriagePipeline())
+    class Client:
+        calls=[]
+        def _complete(self,*_):
+            raise AssertionError('Emergency should bypass follow-up extraction')
+    p=TriagePipeline()
+    p.client=Client()
+    reply=chat.reply('现在张着嘴呼吸，喘不上气',p)
+    assert reply['report'] and '立即就医' in reply['content']
+    assert not chat.pending
+    assert not reply['audit']['errors']
+
+
+def test_chat_partial_answer_does_not_require_a_form():
+    from app.chat_session import ChatSession
+    chat=ChatSession()
+    chat.reply('换的猫粮什么时候到？我家猫最近食欲不好',TriagePipeline())
+    reply=chat.reply('3岁',TriagePipeline())
+    assert chat.answers['age']=='3岁'
+    assert [q['slot'] for q in chat.pending]==['duration','mental_state']
+    assert reply['report'] is None
