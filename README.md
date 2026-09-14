@@ -4,7 +4,15 @@
 >
 > 宠物商城健康沟通与可信评测原型。健康输出仅为科普与就诊准备，不替代兽医诊断，不提供处方或剂量。
 
-## 评委阅读入口
+## 项目介绍
+
+PetSupport-Bench由两部分组成：**一个可运行的宠物咨询聊天应用，以及一套判断其开放式回答质量的评测方法**。应用针对订单/商品咨询中混杂宠物健康描述的场景，自动识别诉求、对已识别风险优先回应、连续追问并生成就诊准备报告；评测侧公开七维标准、构造样本、原始输出、方法验证与失败分析。
+
+项目在既有客服工程基础上改造，模型能力由Hy3提供，不涉及训练或微调。当前完成范围是可交付的参赛研究原型，不是已上线商城客服或临床诊疗系统。
+
+**导师建议先读：[项目说明](docs/project_overview.md) → [交付范围与未提交内容](docs/submission_scope.md) → [实验报告](docs/experiment_report.md)。** 当前应用源码已提交；密钥、依赖安装目录和本机私人数据按规则排除。旧模块“未接入”与源码“未提交”是不同情况。
+
+## 导师与评委阅读入口
 
 - [观看演示视频（MP4，约68秒）](demo/demo.mp4)
 - [最终实验报告](docs/experiment_report.md)：真实结果、典型失败、限制
@@ -97,6 +105,8 @@ TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODE
 旧 `results/A*_results.csv`、`full_results.csv` 及旧图是模拟结果。
 旧 `live_A3_results.csv` 没有调用审计且评分有问题，均不能作为最终实验结论。
 正式结果只读取 `results/final/`；该目录保留失败尝试，汇总以当前哈希下最新记录为准。
+
+`results/memory/`为后续记忆功能的独立验证，不与上述批量评分合并。详细版本及提交范围见[交付说明](docs/submission_scope.md)。
 
 知识库8条简短转述附FDA、ASPCA、Cornell和Merck具体页面链接，见 `data/knowledge_base.jsonl`。只做有限来源核对，不声称临床认证。模型调用使用[Hy3](https://github.com/Tencent-Hunyuan/Hy3)，没有训练或微调。
 

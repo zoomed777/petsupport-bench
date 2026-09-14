@@ -88,7 +88,7 @@ def main():
       '已知限制：知识覆盖窄；关键词可能误判否定/历史叙述；所有急症共用模板会产生无关提醒；资料不足时规则追问可能遗漏具体场景槽位；有限正则无法识别全部危险建议。候选生成和评审共用Hy3，存在同模型偏好；未做人类/兽医一致性和临床有效性验证。',
       '原 results/A0_results.csv 等四配置表、results/full_results.csv、旧图表均为开发期模拟，不是模型实验。旧live_A3_results.csv缺少调用审计且评分曾引用标准槽位，不能引用其76.06分或“零风险”结论。本报告仅引用results/final中的新数据。',
       '', '## 8. 交付状态','',
-      '代码、依赖、构造数据、冻结rubric、真实输出与评分、判别力/重复性/对抗验证、分析报告均在仓库。参赛者录制的[演示视频](../demo/demo.mp4)已附，时长67.57秒，未超过2分钟。docs/demo_script.md为参考脚本。仍需由参赛者在活动入口提交仓库链接及所需附件；上传GitHub不等于完成活动表单提交。']
+      '代码、依赖声明、构造数据、冻结rubric、真实输出与评分、判别力/重复性/对抗验证、分析报告均在仓库。参赛者录制的[演示视频](../demo/demo.mp4)已附，时长67.57秒，未超过2分钟。docs/demo_script.md为参考脚本。参赛者已告知向主办方提交仓库链接；本仓库未独立核验主办方接收或评审状态。已提交源码、未上传的本机文件及未接入模块详见[交付范围说明](submission_scope.md)。']
     (ROOT/'docs/experiment_report.md').write_text('\n'.join(text)+'\n',encoding='utf-8')
     print('Report generated from audited results')
 if __name__=='__main__':main()
