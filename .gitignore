@@ -29,6 +29,8 @@ htmlcov/
 *.sqlite3
 data/feedback/
 logs/
+results/**/.run.lock
+results/**/*.json.tmp
 
 # IDE 与系统文件
 .idea/

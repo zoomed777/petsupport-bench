@@ -1,0 +1,117 @@
+{
+  "run_hash": "9b0326ab1d9359f337ba923076fe4adc2a64ef6ae876e0940637777652520aef",
+  "mode": "live",
+  "scope": "author-constructed engineering assertions; not clinical or full response-quality evaluation",
+  "expected_scenarios": 14,
+  "expected_turns": 55,
+  "completed_scenarios": 14,
+  "passed_scenarios": 14,
+  "completed_turns": 55,
+  "passed_turns": 55,
+  "checks": 151,
+  "passed_checks": 151,
+  "provider_calls": 42,
+  "successful_provider_calls": 42,
+  "provider_errors": 0,
+  "historical_scenario_attempts": 14,
+  "scenarios": [
+    {
+      "case_id": "MT01",
+      "category": "numeric_correction",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT02",
+      "category": "cross_species_switch",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT03",
+      "category": "same_species_ambiguity",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT04",
+      "category": "multiple_pets_one_message",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT05",
+      "category": "new_event",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT06",
+      "category": "support_topic",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT07",
+      "category": "risk_interrupts_followup",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT08",
+      "category": "unknown_profile",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT09",
+      "category": "species_correction",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT10",
+      "category": "symptom_correction",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT11",
+      "category": "new_conversation",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT12",
+      "category": "long_history",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT13",
+      "category": "overlapping_names",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    },
+    {
+      "case_id": "MT14",
+      "category": "pending_ownership_switch",
+      "status": "ok",
+      "passed": true,
+      "failed_checks": []
+    }
+  ]
+}

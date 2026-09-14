@@ -1,0 +1,1138 @@
+{
+  "schema": 1,
+  "source": "作者构造的工程回归对话，不是真实用户、兽医标注或临床验证",
+  "scope": "只检查结构化记忆、路由和可观察交互条件，不给整段医疗建议质量打分",
+  "cases": [
+    {
+      "case_id": "MT01",
+      "category": "numeric_correction",
+      "description": "连续更正年龄和体重，旧数值不回到当前上下文",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，体重10公斤，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "input": "年龄说错了，不是3岁，是5岁，体重实际8公斤。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "5岁"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 8
+            },
+            {
+              "path": "active.context",
+              "op": "excludes",
+              "value": "3岁"
+            },
+            {
+              "path": "active.context",
+              "op": "excludes",
+              "value": "10公斤"
+            }
+          ]
+        },
+        {
+          "input": "体重不是8公斤，是6公斤，精神正常。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "5岁"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 6
+            },
+            {
+              "path": "active.context",
+              "op": "excludes",
+              "value": "8公斤"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT02",
+      "category": "cross_species_switch",
+      "description": "猫狗来回切换，档案和症状独立",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，今天呕吐两次，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "contains",
+              "value": "vomiting"
+            }
+          ]
+        },
+        {
+          "input": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "咪咪"
+            },
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 2
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "1岁"
+            }
+          ]
+        },
+        {
+          "input": "回到豆豆，精神还可以。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "contains",
+              "value": "vomiting"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "diarrhea"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT03",
+      "category": "same_species_ambiguity",
+      "description": "两只狗未指明归属时先追问，再把待处理消息交给指定宠物",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            }
+          ]
+        },
+        {
+          "input": "另一只狗叫旺财，5岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "input": "我家狗今天吐了两次。",
+          "checks": [
+            {
+              "path": "content",
+              "op": "contains",
+              "value": "哪一只"
+            },
+            {
+              "path": "pets.豆豆.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            },
+            {
+              "path": "pets.旺财.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            }
+          ]
+        },
+        {
+          "input": "是豆豆。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "contains",
+              "value": "vomiting"
+            },
+            {
+              "path": "active.facts.frequency",
+              "op": "eq",
+              "value": "两次"
+            },
+            {
+              "path": "pets.旺财.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT04",
+      "category": "multiple_pets_one_message",
+      "description": "一句话同时描述猫狗时不直接混记",
+      "steps": [
+        {
+          "input": "猫吐了，狗食欲不好。",
+          "checks": [
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 0
+            },
+            {
+              "path": "content",
+              "op": "contains",
+              "value": "多只宠物"
+            }
+          ]
+        },
+        {
+          "input": "先说猫，猫叫小白，2岁，今天吐了两次。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "小白"
+            },
+            {
+              "path": "active.profile.species",
+              "op": "eq",
+              "value": "cat"
+            }
+          ]
+        },
+        {
+          "input": "另一只狗叫小黑，4岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 2
+            },
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "小黑"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT05",
+      "category": "new_event",
+      "description": "同一宠物开启新事件，保留档案但清理旧症状次数",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，今天呕吐两次。",
+          "checks": [
+            {
+              "path": "active.facts.symptom",
+              "op": "contains",
+              "value": "vomiting"
+            }
+          ]
+        },
+        {
+          "input": "豆豆上次已经好了，新情况是今天拉稀。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "eq",
+              "value": [
+                "diarrhea"
+              ]
+            },
+            {
+              "path": "active.facts.frequency",
+              "op": "absent"
+            }
+          ]
+        },
+        {
+          "input": "今天拉了三次，食欲正常，精神正常。",
+          "checks": [
+            {
+              "path": "active.facts.frequency",
+              "op": "eq",
+              "value": "三次"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            },
+            {
+              "path": "report",
+              "op": "eq",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT06",
+      "category": "support_topic",
+      "description": "订单话题不混入旧症状，回到原宠物仍保留未排除风险",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，刚吃了巧克力。",
+          "checks": [
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "report",
+              "op": "eq",
+              "value": true
+            }
+          ]
+        },
+        {
+          "input": "先说订单，我的快递什么时候到？",
+          "checks": [
+            {
+              "path": "topic",
+              "op": "eq",
+              "value": "support"
+            },
+            {
+              "path": "intent",
+              "op": "eq",
+              "value": "order"
+            },
+            {
+              "path": "report",
+              "op": "eq",
+              "value": false
+            },
+            {
+              "path": "content",
+              "op": "excludes",
+              "value": "巧克力"
+            }
+          ]
+        },
+        {
+          "input": "回到豆豆，现在精神正常。",
+          "checks": [
+            {
+              "path": "topic",
+              "op": "eq",
+              "value": "health"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "content",
+              "op": "contains",
+              "value": "立即就医"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT07",
+      "category": "risk_interrupts_followup",
+      "description": "补充信息途中出现已知紧急信号，不继续等追问",
+      "steps": [
+        {
+          "input": "猫叫咪咪，今天拉稀。",
+          "checks": [
+            {
+              "path": "pending_slots",
+              "op": "contains",
+              "value": "age"
+            }
+          ]
+        },
+        {
+          "input": "它1岁。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "1岁"
+            }
+          ]
+        },
+        {
+          "input": "现在张着嘴呼吸，喘不上气。",
+          "checks": [
+            {
+              "path": "content",
+              "op": "contains",
+              "value": "立即就医"
+            },
+            {
+              "path": "report",
+              "op": "eq",
+              "value": true
+            },
+            {
+              "path": "pending_slots",
+              "op": "eq",
+              "value": []
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "呼吸困难"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT08",
+      "category": "unknown_profile",
+      "description": "用户撤回年龄体重后不继续沿用旧数值",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "input": "刚才年龄不清楚，体重也不知道，请重新问我。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "absent"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "absent"
+            },
+            {
+              "path": "active.context",
+              "op": "excludes",
+              "value": "3岁"
+            }
+          ]
+        },
+        {
+          "input": "现在确认是4岁，体重7公斤。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "4岁"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT09",
+      "category": "species_correction",
+      "description": "明确更正物种时更新同一档案",
+      "steps": [
+        {
+          "input": "猫叫豆豆，3岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "active.profile.species",
+              "op": "eq",
+              "value": "cat"
+            }
+          ]
+        },
+        {
+          "input": "刚才说错了，不是猫，是狗。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            },
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 1
+            },
+            {
+              "path": "active.profile.species",
+              "op": "eq",
+              "value": "dog"
+            }
+          ]
+        },
+        {
+          "input": "豆豆体重8公斤，精神正常。",
+          "checks": [
+            {
+              "path": "active.profile.species",
+              "op": "eq",
+              "value": "dog"
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT10",
+      "category": "symptom_correction",
+      "description": "明确纠正症状后，不叠加已经撤回的症状",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，今天呕吐两次。",
+          "checks": [
+            {
+              "path": "active.facts.symptom",
+              "op": "contains",
+              "value": "vomiting"
+            }
+          ]
+        },
+        {
+          "input": "说错了，不是呕吐，是拉稀。",
+          "checks": [
+            {
+              "path": "active.facts.symptom",
+              "op": "eq",
+              "value": [
+                "diarrhea"
+              ]
+            },
+            {
+              "path": "active.context",
+              "op": "excludes",
+              "value": "呕吐"
+            }
+          ]
+        },
+        {
+          "input": "拉了三次，食欲正常，精神正常。",
+          "checks": [
+            {
+              "path": "active.facts.frequency",
+              "op": "eq",
+              "value": "三次"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT11",
+      "category": "new_conversation",
+      "description": "新会话保留稳定档案，不恢复旧事件",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，刚吃了巧克力。",
+          "checks": [
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            }
+          ]
+        },
+        {
+          "input": "豆豆今天拉稀两次，食欲正常，精神正常。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "eq",
+              "value": []
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "eq",
+              "value": [
+                "diarrhea"
+              ]
+            },
+            {
+              "path": "active.context",
+              "op": "excludes",
+              "value": "巧克力"
+            }
+          ],
+          "action": "new_conversation"
+        },
+        {
+          "input": "豆豆现在精神正常。",
+          "checks": [
+            {
+              "path": "active.risks",
+              "op": "eq",
+              "value": []
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT12",
+      "category": "long_history",
+      "description": "超过近期原文上限，仍保留档案和未排除风险",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，体重6公斤，刚吃了巧克力。",
+          "checks": [
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第1条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第2条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第3条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第4条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第5条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第6条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第7条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第8条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第9条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第10条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第11条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "精神正常，正在联系医院。这是第12条补充。",
+          "checks": [
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.retained_turns",
+              "op": "lte",
+              "value": 6
+            },
+            {
+              "path": "active.context_units",
+              "op": "lte",
+              "value": 10000
+            }
+          ]
+        },
+        {
+          "input": "豆豆还有什么信息需要记录？",
+          "checks": [
+            {
+              "path": "active.risks",
+              "op": "contains",
+              "value": "误食巧克力"
+            },
+            {
+              "path": "active.folded_turns",
+              "op": "gte",
+              "value": 8
+            },
+            {
+              "path": "active.profile.weight_kg",
+              "op": "eq",
+              "value": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT13",
+      "category": "overlapping_names",
+      "description": "名字包含关系不能把另一只宠物合并进旧档案",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            }
+          ]
+        },
+        {
+          "input": "另一只狗叫小豆豆，1岁，今天拉稀两次，精神正常。",
+          "checks": [
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 2
+            },
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "小豆豆"
+            },
+            {
+              "path": "pets.豆豆.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "1岁"
+            }
+          ]
+        },
+        {
+          "input": "回到豆豆，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            },
+            {
+              "path": "active.profile.age",
+              "op": "eq",
+              "value": "3岁"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "diarrhea"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "MT14",
+      "category": "pending_ownership_switch",
+      "description": "待确认是哪只狗时切到猫，不能把待处理的狗症状写进猫档案",
+      "steps": [
+        {
+          "input": "狗叫豆豆，3岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "豆豆"
+            }
+          ]
+        },
+        {
+          "input": "另一只狗叫旺财，5岁，今天食欲不好，精神正常。",
+          "checks": [
+            {
+              "path": "pet_count",
+              "op": "eq",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "input": "我家狗今天吐了两次。",
+          "checks": [
+            {
+              "path": "content",
+              "op": "contains",
+              "value": "哪一只"
+            }
+          ]
+        },
+        {
+          "input": "先说另一只猫，猫叫咪咪，1岁，今天拉稀。",
+          "checks": [
+            {
+              "path": "active.name",
+              "op": "eq",
+              "value": "咪咪"
+            },
+            {
+              "path": "active.profile.species",
+              "op": "eq",
+              "value": "cat"
+            },
+            {
+              "path": "active.facts.symptom",
+              "op": "excludes",
+              "value": "vomiting"
+            },
+            {
+              "path": "active.facts.frequency",
+              "op": "absent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

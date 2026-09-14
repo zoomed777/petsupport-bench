@@ -47,6 +47,11 @@ class ChatSession:
         return {'content':content,'report':None,'audit':audit}
 
     def reply(self, text, pipeline):
+        # Earlier turns must remain historical snapshots. Some audit fields
+        # originate from mutable pet facts and would otherwise change later.
+        return json.loads(json.dumps(self._reply(text, pipeline), ensure_ascii=False))
+
+    def _reply(self, text, pipeline):
         text = text.strip()
         raw_flags = pipeline.engine.detect(text)
         if units(text) > MAX_MESSAGE_UNITS:

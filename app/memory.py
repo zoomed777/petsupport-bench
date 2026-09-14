@@ -165,7 +165,23 @@ class Memory:
     def select(self, text):
         """Return (pet, clarification, text); never guess ambiguous ownership."""
         mentioned = {sp for term,sp in [('猫','cat'),('狗','dog')] if re.search(term+r'(?!粮|砂|窝|笼|绳|罐|条|爬)',text)}
-        matches = [p for p in self.pets.values() if p.name and p.name in text]
+        named = re.search(r'(?:名字叫|名叫|叫)([\u4e00-\u9fffA-Za-z0-9]{1,10})(?=[，。！？、\s,.!?]|$)',text)
+        name = named.group(1) if named else None
+        if name in {'了','起来','不停'}:
+            name, named = None, None
+        # Prefer the longest name at each span, not substring membership. A new
+        # declared name also masks old names contained within it (豆豆/小豆豆).
+        hits = [(p, m.start(), m.end()) for p in self.pets.values() if p.name
+                for m in re.finditer(re.escape(p.name), text)]
+        matches = []
+        for pet, start, end in hits:
+            if named and pet.name != name and named.start(1) <= start and end <= named.end(1):
+                continue
+            if any(other.id != pet.id and left <= start and end <= right and right-left > end-start
+                   for other, left, right in hits):
+                continue
+            if pet not in matches:
+                matches.append(pet)
         correction = re.search(r'不是(猫|狗)[，,\s]*(?:而?是)(猫|狗)', text)
         if correction and self.active:
             pet = self.active
@@ -173,16 +189,14 @@ class Memory:
             pet.put('species', sp, correction.group(0))
             return pet, '', text[correction.end():]
         if len(mentioned) > 1 or len(matches) > 1:
-            self.pending_message = ''
+            self.pending_message, self.pending_species = '', None
             return None, '这条消息涉及多只宠物。请先说清一只宠物的名字和它的情况，我会分别记录，不把信息混在一起。', text
-        named = re.search(r'(?:名字叫|名叫|叫)([\u4e00-\u9fffA-Za-z0-9]{1,10})(?=[，。！？、\s,.!?]|$)',text)
-        name = named.group(1) if named else None
-        # A symptom such as “一直叫” is not a pet name.
-        if name in {'了','起来','不停'}:
-            name = None
         sp = next(iter(mentioned), None)
         another = bool(re.search(r'另一只|第二只|另外一只|换一只', text))
+        if another and name and any(p.name == name for p in self.pets.values()):
+            return None, '已经有一只叫'+name+'的宠物。另一只如果同名，请给它一个不同的称呼，我再分别记录。', text
         pet = matches[0] if matches else None
+        created = False
         if named and not pet:
             pet = next((p for p in self.pets.values() if p.name == name), None)
             if pet is None and self.active and self.active.name.startswith('未命名') and not another and (not sp or sp == self.active.species):
@@ -200,6 +214,7 @@ class Memory:
             sp = sp or self.pending_species
             pet = Pet(name=name or f'未命名{ {"cat":"猫","dog":"狗"}.get(sp,"宠物")}{len(self.pets)+1}', species=sp)
             self.pets[pet.id] = pet
+            created = True
         if sp and pet.species and sp != pet.species:
             return None, f'{pet.name}此前记录为另一物种。你是在更正档案，还是说另一只宠物？请明确说明，例如“不是猫，是狗”。', text
         if sp:
@@ -208,7 +223,10 @@ class Memory:
             pet.put('species', pet.species, text)
         self.active_id = pet.id
         if self.pending_message:
-            text = self.pending_message+'\n'+text
+            # Only resolve the pending ownership question for a compatible,
+            # already-known pet. A switch to a new pet abandons that message.
+            if not created and not another and pet.species == self.pending_species:
+                text = self.pending_message+'\n'+text
             self.pending_message, self.pending_species = '', None
         if re.search(r'新情况|新的问题|新事件|上次.*好了|重新开始健康咨询',text):
             pet.reset_event()

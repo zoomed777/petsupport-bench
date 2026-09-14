@@ -48,13 +48,22 @@
 ## 做过哪些测试
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py tests/test_memory.py -q
+.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py tests/test_memory.py tests/test_eval_artifacts.py -q
 .\.venv\Scripts\python.exe scripts/validate_memory_live.py
 ```
 
-28 项聚焦测试覆盖了宠物隔离、同物种歧义、数值和症状更正、话题切换、旧事件清理、长历史风险保留、超长消息、请求预算、档案过期，以及 SQLite 和界面的保存、恢复、清除。
+初版 28 项聚焦测试覆盖了宠物隔离、同物种歧义、数值和症状更正、话题切换、旧事件清理、长历史风险保留、超长消息、请求预算、档案过期，以及 SQLite 和界面的保存、恢复、清除。目前加入评测缓存和多轮案例后，共 62 项测试。
 
 另外用四轮构造消息做了真实 Hy3 调用验证，结果保存在 `results/memory/live_validation.json`。这是单独的记忆检查，没有并入原来的七维批量评测；`results/final/` 仍保留原实验。
+
+上面的 `validate_memory_live.py` 是初版脚本，已有结果时会拒绝覆盖。新增多轮测试使用下面的命令和独立目录：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/eval_multiturn.py --mode offline --out results/my_multiturn_offline
+.\.venv\Scripts\python.exe scripts/eval_multiturn.py --mode live --out results/my_multiturn_live --max-calls 80
+```
+
+新增 14 组、55 轮、151 个检查条件。修复前离线有 2 组失败：名字包含关系造成档案合并，以及待确认的狗消息串进新猫档案。修复这两处后，中间版本在线全部通过，调用 42 次、错误 0 次。最后还把每轮回复和审计改成独立快照，避免旧记录随后续事实变化；最终版离线全部通过，在线完整完成 11 组后遇到 HTTP 402 额度问题，剩余 3 组未完成。各阶段和失败记录见[多轮报告](multiturn_report.md)。这组案例也用于修复，不是独立留出测试。
 
 ## 还需要完善的地方
 

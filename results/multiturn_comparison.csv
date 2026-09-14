@@ -1,0 +1,15 @@
+case_id,category,description,baseline_offline,fixed_offline,fixed_live
+MT01,numeric_correction,连续更正年龄和体重，旧数值不回到当前上下文,通过,通过,通过
+MT02,cross_species_switch,猫狗来回切换，档案和症状独立,通过,通过,通过
+MT03,same_species_ambiguity,两只狗未指明归属时先追问，再把待处理消息交给指定宠物,通过,通过,通过
+MT04,multiple_pets_one_message,一句话同时描述猫狗时不直接混记,通过,通过,通过
+MT05,new_event,同一宠物开启新事件，保留档案但清理旧症状次数,通过,通过,通过
+MT06,support_topic,订单话题不混入旧症状，回到原宠物仍保留未排除风险,通过,通过,通过
+MT07,risk_interrupts_followup,补充信息途中出现已知紧急信号，不继续等追问,通过,通过,通过
+MT08,unknown_profile,用户撤回年龄体重后不继续沿用旧数值,通过,通过,通过
+MT09,species_correction,明确更正物种时更新同一档案,通过,通过,通过
+MT10,symptom_correction,明确纠正症状后，不叠加已经撤回的症状,通过,通过,通过
+MT11,new_conversation,新会话保留稳定档案，不恢复旧事件,通过,通过,通过
+MT12,long_history,超过近期原文上限，仍保留档案和未排除风险,通过,通过,未完成
+MT13,overlapping_names,名字包含关系不能把另一只宠物合并进旧档案,失败,通过,未完成
+MT14,pending_ownership_switch,待确认是哪只狗时切到猫，不能把待处理的狗症状写进猫档案,失败,通过,未完成

@@ -31,6 +31,7 @@ def main():
       f'个人参赛作品｜报告整理日期：{date.today().isoformat()}。这份报告使用真实 Hy3 调用和规则评分的结果，原始记录在 [traces.jsonl](../results/final/traces.jsonl)。','',
       '这批实验对应提交 `6368460`。后来我修复了混合意图识别、调整了聊天界面，但没有重跑整套在线评测，所以这里仍是原实验版本的分数。','',
       '后面补的记忆 v2 做了单独验证，见[记忆管理](memory_management.md)，没有并入本报告评分。',
+      '', '后来又补了 14 组、55 轮工程回归测试，修复了两处宠物串档问题，结果见[多轮测试报告](multiturn_report.md)。这组检查和本报告的七维评分不同。',
       '', '## 1. 我想检查的问题','',
       '我关注的是宠物商城咨询里混着健康描述的情况：系统能否注意到风险，问清缺少的信息，并说明自己能做什么。这类输入和回答都没有唯一写法，所以我用 Hy3 处理语言生成、部分意图判断和语义评分，再用规则检查已知紧急信号和用药红线。当前应用没有连接真实订单或人工接管系统。',
       '', '## 2. 样本从哪里来','',
@@ -46,9 +47,9 @@ def main():
       '- 参数为温度 0、`max_tokens=4096`、`thinking=disabled`。保存请求 ID、模型、用量、停止原因、输出、评分理由、错误和输入/代码指纹，方便检查。',
       '- 这批实验只评第一轮。聊天页面后来支持继续回答追问，但没有重新做完整多轮评测。A0 和 A3 同时改变了多个组件，也不能用两组差异单独解释某一个组件的作用。',
       '', '```powershell',
-      '.\\.venv\\Scripts\\python.exe scripts/final_eval.py',
-      '.\\.venv\\Scripts\\python.exe scripts/validate_final.py',
-      '.\\.venv\\Scripts\\python.exe scripts/analyze_final.py','```',
+      '.\\.venv\\Scripts\\python.exe scripts/final_eval.py --out results/my_single_turn_run',
+      '.\\.venv\\Scripts\\python.exe scripts/validate_final.py --out results/my_rubric_validation','```',
+      '', '重新运行请使用独立目录。新版验证脚本会检查输入、代码和模型设置的指纹，拒绝改写原结果。`analyze_final.py` 仍用于整理 `results/final/` 中的原报告，不读取上面两个新目录。',
       '', '## 4. 完整评测结果','', '| 配置 | 有效评分 | 平均分 | 闸门触发 | 生成调用次数 | 失败/回退 |','|---|---:|---:|---:|---:|---:|']
     for a,v in summary['configurations'].items():
         text.append(f'| {a} | {v["scored"]} | {v["mean"]} | {v["gate_count"]} | {v["generation_calls"]} | {v["fallback_or_error"]} |')

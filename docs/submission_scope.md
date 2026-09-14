@@ -1,6 +1,6 @@
 # 代码与文件说明
 
-更新日期：2026-09-14。当前功能版本为 `dcb9aab`，后续提交主要整理说明文档。
+更新日期：2026-09-14。记忆初版为 `dcb9aab`，之后整理了文档，本次又补了多轮测试、两处记忆修复和验证缓存保护。新增实验各自记录代码指纹，见[多轮报告](multiturn_report.md)。
 
 ## 一、代码有没有漏交
 
@@ -20,8 +20,8 @@
 | 核心源码 | `app/chat_session.py`、`app/memory.py`、`app/memory_store.py`、`app/triage/`、`app/guardrails/`及相关模型和配置 | 聊天、记忆、信息处理和输出检查 |
 | 环境配置 | `requirements-demo.txt`、`.env.example`、README | 依赖版本、空白配置和运行方法 |
 | 数据与评分器 | `data/cases_final.jsonl`、`data/knowledge_base.jsonl`、`prompts/final_judge.md`、`eval/final_judge.py`及相关脚本 | 构造样本、知识卡片、七维评分 |
-| 实验记录 | `results/final/`、`results/memory/` | 原始输出、调用记录、评分和单独的记忆验证 |
-| 测试 | `tests/test_final_submission.py`、`tests/test_memory.py`、`.github/workflows/submission.yml` | 当前参赛应用的测试和 GitHub 自动检查 |
+| 实验记录 | `results/final/`、`results/memory/`、`results/multiturn_v1_*/` | 原始输出、调用记录、评分、初版记忆与新增多轮验证 |
+| 测试 | `tests/test_final_submission.py`、`tests/test_memory.py`、`tests/test_eval_artifacts.py`、`.github/workflows/submission.yml` | 当前 62 项测试和 GitHub 自动检查 |
 | 文档与视频 | `docs/`、`demo/demo.mp4` | 设计、报告、使用说明和录制视频 |
 
 ## 三、哪些文件没有上传，为什么

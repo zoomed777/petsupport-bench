@@ -1,0 +1,10 @@
+{
+  "date": "2026-09-14",
+  "purpose": "Separate minimal connectivity probe after two failures in the final-version multi-turn run",
+  "request": {"system": "Reply with OK only.", "user": "Connectivity diagnostic"},
+  "exception": "APIStatusError",
+  "http_status": 402,
+  "error_body_contains": {"quota": true, "额度": true, "rate": false, "限流": false},
+  "scope": "Not included in evaluation call counts; full error body and credentials are not published",
+  "action": "Stopped further API requests. Preserve partial results and resume only after usable quota is restored."
+}

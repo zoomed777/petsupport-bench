@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "inputs_sha256": "619df869e64e3c9bfaba1100e631136931035a8e9732662d1c43a11f6de82b5e",
+  "settings": {
+    "kind": "multiturn-v1",
+    "mode": "offline"
+  },
+  "code_sha256": {
+    "scripts/eval_multiturn.py": "a96b30aa31b94646fc9cbaeb78a06c3aca7fd829de01a5b8e1dd023ff8b51f68",
+    "eval/run_artifacts.py": "1bf3e49fa2b47cd8b84653ee91af77ebfe90a5504358f0d26a683af2dee0dd2e",
+    "app/chat_session.py": "7c38565b987a74bcc790256f14a7fb8d9db832bf035a0affa9301cdb6d017319",
+    "app/memory.py": "9b7620441d84f966be18de1ef3b144a56ad4655ffd8f329de2b559f0c60c00f5",
+    "app/memory_store.py": "36bebb4f07dd003254e91d27abc8ac6d033cf58dddf988711f216d439e845b78",
+    "requirements-demo.txt": "f6d934e7779dd896e11017bcbdcb67adf69181e74f8072f75800c02852360275",
+    "data/knowledge_base.jsonl": "22065a9cb999372274dd61acaa8f40b993692b9ac5b787b732309bbc84b6e75f",
+    "config/redflag_rules.json": "62bab31a5ca57bbef073e30d763840e31fa2ee39af1c83cb8d6a2157d86c1113",
+    "app/triage/__init__.py": "df994a19b6113ceb126703fcfd951585f5a527829c47947c57797acb25892bca",
+    "app/triage/hy3_client.py": "1928730ef3e6206379ecda185b6907d416a0c070fb2b05240276c781bf3d017f",
+    "app/triage/pipeline.py": "b784bc9abaf264c1353a529666ff93c619ecee49d01bb2002021bf91b5bdff24",
+    "app/triage/router.py": "990fd77301ad52253008a5f09eff795f1e52469536e879d7f550e46c2654c4eb",
+    "app/triage/slots.py": "e0ffb12cb330bb7087d0c645e3cdd252efc4f452ac9ee1da9acc23915a3d32e1",
+    "app/guardrails/__init__.py": "136b830c800383216c2a9be6af1ab67b54a25989b4c348ca6ddb94675dfb95fb",
+    "app/guardrails/redflag.py": "d25d852b369a744f8a42bf814a3b6bfbc9f13e1ae030d3557cbfa8961cd99945",
+    "app/guardrails/redlines.py": "a7e9bb0eb34a075ca91a03d581495aaf4d133ffcd76d3c35576c4bbee78c6560",
+    "app/models/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "app/models/schemas.py": "d8dd119bafb1310e1d6d597c6bb2b6b852b89d2946610afdf14c2ca541702456",
+    "app/models/triage_schemas.py": "c511c9765be769d30b8a4b058b24f68e3dfac069d7d414426579bf6570cacf8a"
+  },
+  "run_hash": "24d0a4378253bb2f1594971220c24b844430c28991d9e6661ec28a81e908a4e4"
+}

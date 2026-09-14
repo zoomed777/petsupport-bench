@@ -1,12 +1,15 @@
 """Independent constructed output ranking + 3 repeated stochastic judge trials."""
 from __future__ import annotations
-import json, statistics, sys
+import argparse, json, statistics, sys
+from datetime import datetime, timezone
+import time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app.triage.hy3_client import Hy3TriageClient
 from app.triage.pipeline import load_kb
-from eval.final_judge import judge
+from eval.final_judge import judge, PROMPT
+from eval.run_artifacts import manifest, run_directory, read_records, append_record, write_json, provider_settings
 
 def fixtures():
     scenarios=[
@@ -27,41 +30,102 @@ def fixtures():
             rows.append({'case':case,'tier':tier,'output':text})
     return rows
 
-def main():
-    if hasattr(sys.stdout,'reconfigure'):sys.stdout.reconfigure(encoding='utf-8')
-    out=ROOT/'results/final';out.mkdir(exist_ok=True,parents=True)
-    rows=fixtures()
-    (out/'validation_inputs.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in rows),encoding='utf-8')
-    path=out/'validation_traces.jsonl'
-    existing=[json.loads(s) for s in path.read_text(encoding='utf-8').splitlines()] if path.exists() else []
-    done={(r['case_id'],r['tier'],r['repeat']):r for r in existing if r.get('status')=='ok'}
-    kb=list(load_kb().values())
-    with path.open('a',encoding='utf-8') as f:
+def summarize(records, rows, repeats, run_hash):
+    expected = {(row['case']['case_id'], row['tier'], repeat)
+                for row in rows for repeat in range(repeats)}
+    latest = {}
+    for record in records:
+        key = (record['case_id'], record['tier'], record['repeat'])
+        if key not in expected:
+            raise ValueError('Unexpected cached validation key')
+        latest[key] = record
+    valid = [r for r in latest.values() if r['status'] == 'ok']
+    groups = {}
+    for r in valid:
+        groups.setdefault((r['case_id'], r['tier']), []).append(r['verdict']['total'])
+    means = {k: statistics.mean(v) for k, v in groups.items()}
+    names = sorted({row['case']['case_id'] for row in rows})
+    ranked = [n for n in names if all(len(groups.get((n, t), [])) == repeats
+                                     for t in ['good', 'medium', 'bad'])]
+    summary = {
+        'run_hash': run_hash, 'expected_judgements': len(expected), 'completed': len(valid),
+        'attempts': len(records), 'failed_attempts': sum(r['status'] != 'ok' for r in records),
+        'ranked_scenarios': len(ranked),
+        'strict_good_medium_bad': sum(means[(n, 'good')] > means[(n, 'medium')] > means[(n, 'bad')]
+                                      for n in ranked),
+        'mean_by_tier': {t: round(statistics.mean(r['verdict']['total'] for r in valid if r['tier'] == t), 2)
+                        for t in ['good', 'medium', 'bad', 'attack'] if any(r['tier'] == t for r in valid)},
+        'mean_repeat_sd': round(statistics.mean(statistics.pstdev(v) for v in groups.values()
+                                               if len(v) == repeats), 3) if any(len(v) == repeats for v in groups.values()) else None,
+        'per_output': {n + '/' + t: {'scores': v, 'sd': statistics.pstdev(v)}
+                       for (n, t), v in groups.items()},
+    }
+    return summary, latest
+
+
+def run_validation(out, rows, repeats, client_factory, settings, pause=1.35):
+    if repeats < 2 or not rows:
+        raise ValueError('Use at least two repeats and a nonempty input set')
+    identities = [(row['case']['case_id'], row['tier']) for row in rows]
+    if len(identities) != len(set(identities)):
+        raise ValueError('Duplicate validation identity')
+    paths = [Path(__file__), PROMPT, ROOT / 'eval/final_judge.py', ROOT / 'eval/run_artifacts.py',
+             ROOT / 'app/triage/hy3_client.py', ROOT / 'app/triage/pipeline.py',
+             ROOT / 'app/guardrails/redlines.py', ROOT / 'data/knowledge_base.jsonl',
+             ROOT / 'requirements-demo.txt']
+    config = manifest(rows, {**settings, 'kind': 'rubric-validation-v2', 'repeats': repeats}, paths)
+    with run_directory(out, rows, config) as target:
+        path = target / 'validation_traces.jsonl'
+        records = read_records(path, config['run_hash'])
+        _, done = summarize(records, rows, repeats, config['run_hash'])
+        kb = list(load_kb().values())
         for row in rows:
-            for repeat in range(3):
-                key=(row['case']['case_id'],row['tier'],repeat)
-                if key in done:continue
-                record={'case_id':key[0],'tier':key[1],'repeat':repeat}
+            for repeat in range(repeats):
+                key = (row['case']['case_id'], row['tier'], repeat)
+                if done.get(key, {}).get('status') == 'ok':
+                    continue
+                record = {'case_id': key[0], 'tier': key[1], 'repeat': repeat,
+                          'run_hash': config['run_hash'],
+                          'timestamp': datetime.now(timezone.utc).isoformat()}
+                client = None
                 try:
-                    c=Hy3TriageClient.from_env()
-                    record.update(verdict=judge(c,row['case'],row['output'],kb),calls=c.calls,status='ok')
+                    client = client_factory()
+                    if client is None:
+                        raise RuntimeError('Hy3 configuration missing')
+                    verdict = judge(client, row['case'], row['output'], kb)
+                    record.update(verdict=verdict, status='ok')
                 except Exception as exc:
-                    record.update(status='error',error=type(exc).__name__)
-                f.write(json.dumps(record,ensure_ascii=False)+'\n');f.flush()
-                done[key]=record
-                print(key,record['status'],flush=True)
-    valid=[r for r in done.values() if r['status']=='ok']
-    groups={}
-    for r in valid:groups.setdefault((r['case_id'],r['tier']),[]).append(r['verdict']['total'])
-    means={k:statistics.mean(v) for k,v in groups.items()}
-    names=sorted(set(k[0] for k in groups))
-    ranked=[n for n in names if all((n,t) in means for t in ['good','medium','bad'])]
-    strict=sum(means[(n,'good')]>means[(n,'medium')]>means[(n,'bad')] for n in ranked)
-    summary={'expected_judgements':48,'completed':len(valid),'ranked_scenarios':len(ranked),'strict_good_medium_bad':strict,
-             'mean_by_tier':{t:round(statistics.mean(r['verdict']['total'] for r in valid if r['tier']==t),2) for t in ['good','medium','bad','attack'] if any(r['tier']==t for r in valid)},
-             'mean_repeat_sd':round(statistics.mean(statistics.pstdev(v) for v in groups.values() if len(v)==3),3) if any(len(v)==3 for v in groups.values()) else None,
-             'per_output':{n+'/'+t:{'scores':v,'sd':statistics.pstdev(v)} for (n,t),v in groups.items()}}
-    (out/'validation_summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
-    print(json.dumps(summary,ensure_ascii=False),flush=True)
-    if len(valid)!=48:raise SystemExit(2)
-if __name__=='__main__':main()
+                    record.update(status='error', error=type(exc).__name__)
+                finally:
+                    record['calls'] = list(client.calls) if client else []
+                    if client and getattr(client, 'client', None):
+                        client.client.close()
+                append_record(path, record)
+                records.append(record)
+                print(key, record['status'], flush=True)
+                if pause:
+                    time.sleep(pause)
+        summary, _ = summarize(records, rows, repeats, config['run_hash'])
+        write_json(target / 'validation_summary.json', summary)
+        return summary
+
+
+def main():
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    parser = argparse.ArgumentParser(description='Versioned validation; never overwrites results/final')
+    parser.add_argument('--out', default='results/validation_v2')
+    parser.add_argument('--repeats', type=int, default=3)
+    args = parser.parse_args()
+    try:
+        result = run_validation(ROOT / args.out, fixtures(), args.repeats,
+                                Hy3TriageClient.from_env, provider_settings())
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
+    print(json.dumps(result, ensure_ascii=False), flush=True)
+    if result['completed'] != result['expected_judgements']:
+        raise SystemExit(2)
+
+
+if __name__ == '__main__':
+    main()

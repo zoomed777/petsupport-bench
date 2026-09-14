@@ -68,8 +68,11 @@ A3 的总分没有超过 A0。拆开看时，我发现既有应用的问题，�
 | `8b66a0e` | 聊天交互初版测试、真实两轮检查 | 发生在记忆升级之前 |
 | `dcb9aab`、`results/memory/` | 28 项聚焦测试、4 轮真实 Hy3 验证，GitHub CI 通过 | 覆盖本次记忆功能，复杂指代和多用户场景还没全面测试 |
 | `demo/demo.mp4` | 67.57 秒聊天演示 | 视频录制早于记忆 v2，新增记忆功能另看验证记录 |
+| `results/multiturn_v1_*/` | 新增 14 组、55 轮；中间版在线通过，最终快照版离线通过，在线完成 11/14 组后受 HTTP 402 额度问题阻断 | 剩余 3 组在线未完成；是工程回归测试，不是独立留出集或整段健康建议评分 |
 
 后面整理文档不会改变这些实验对应的代码版本。详细数据见[实验报告](experiment_report.md)，记忆功能见[记忆管理](memory_management.md)。
+
+补充测试发现了两处具体问题：“豆豆”和“小豆豆”会被当成一只，以及待确认的狗消息会带进后来切换的猫档案。现在都已修复，原失败记录和修复后结果放在[多轮报告](multiturn_report.md)。最后又修复了历史审计字段引用可变记忆的问题，当前每轮保存独立快照。包含新增测试后，当前共 62 项自动测试。
 
 ## 六、目前完成的和还没做的
 
@@ -88,7 +91,7 @@ A3 的总分没有超过 A0。拆开看时，我发现既有应用的问题，�
 当前应用的测试命令是：
 
 ```powershell
-python -m pytest tests/test_final_submission.py tests/test_memory.py -q
+python -m pytest tests/test_final_submission.py tests/test_memory.py tests/test_eval_artifacts.py -q
 ```
 
 结果表对应的原始输出在 `results/final/`，记忆测试在 `results/memory/`。脚本有缓存或防覆盖处理，如果要重新调用模型，需要留意运行目录和提示，也会消耗 API 额度。

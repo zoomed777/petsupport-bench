@@ -21,6 +21,7 @@
 - [方法验证结果](results/final/validation_summary.json)：好中差排序、重复评分和对抗测试。
 - [闸门触发记录](results/final/gate_audit.jsonl)：哪些是模型评审判断，哪些是规则命中。
 - [记忆管理](docs/memory_management.md) · [四轮真实 Hy3 验证](results/memory/live_validation.json)。
+- [新增多轮测试报告](docs/multiturn_report.md)：14 组、55 轮，包含修复前后的对比和真实调用。
 - [录制参考脚本](docs/demo_script.md)。
 
 ## 应用怎么工作
@@ -47,7 +48,9 @@
 - 可以主动开启本机 SQLite 保存和恢复；新对话保留稳定档案，不沿用旧症状。
 - 年龄、体重超过 30 天需要重新确认；单独问订单时不会带入旧健康事件。
 
-这部分完成了 28 项聚焦测试和 4 轮真实 Hy3 验证。上下文预算用字节数保守估算，不是 Hy3 官方 tokenizer 的精确计数。本机数据库没有加密，也没做多用户登录隔离。视频录得较早，还没有展示后面补上的记忆功能。
+初版完成了 28 项聚焦测试和 4 轮真实 Hy3 验证。后来补了 14 组、55 轮，修复名字包含关系、待确认消息串档两处问题；这个中间版本在线 151 个条件通过，实际调用 42 次，错误 0 次。最后又把每轮审计改成独立快照，最终版离线 151 个条件通过，在线完整完成了 11 组，剩余 3 组因接口 HTTP 402 额度问题未完成。各版本和失败记录都在[多轮报告](docs/multiturn_report.md)，没有用中间结果代替最终版，也不把构造案例通过率当作真实用户成功率。
+
+上下文预算用字节数保守估算，不是 Hy3 官方 tokenizer 的精确计数。本机数据库没有加密，也没做多用户登录隔离。视频录得较早，还没有展示后面补上的记忆功能。
 
 ## 如何运行
 
@@ -76,10 +79,11 @@ TokenHub 配置示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY
 ## 如何复现实验
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/final_eval.py
-.\.venv\Scripts\python.exe scripts/validate_final.py
-.\.venv\Scripts\python.exe scripts/analyze_final.py
+.\.venv\Scripts\python.exe scripts/final_eval.py --out results/my_single_turn_run
+.\.venv\Scripts\python.exe scripts/validate_final.py --out results/my_rubric_validation
 ```
+
+重跑请使用独立目录，保留原结果。新版 `validate_final.py` 会核对输入、评分器和模型设置的指纹，只复用同一版本的记录；指纹变化或旧目录没有版本信息时会拒绝复用。默认新目录为 `results/validation_v2/`，不会写入 `results/final/`。`analyze_final.py` 仍只整理已保存的原批量实验，不是上面新目录的报告生成器。
 
 这批实验使用 `data/cases_final.jsonl` 中的 100 条构造样本，共 39 种不同表达，其中 25 条涉及混合意图、诱导或长文本干扰。样本不是实际病例，标签也没有经过兽医标注。
 
@@ -93,18 +97,20 @@ A0 均分为 83.70，A3 为 78.78。完整方案这次没有在总分上超过�
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install pytest
-.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py tests/test_memory.py -q
+.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py tests/test_memory.py tests/test_eval_artifacts.py -q
 .\.venv\Scripts\python.exe scripts/smoke_test.py
 .\.venv\Scripts\python.exe scripts/check_submission.py
 ```
 
-这些测试针对本次参赛应用。仓库里的旧客服集成测试还需要原工程的额外依赖和服务。
+当前共 62 项测试，针对本次参赛应用、缓存保护和新增多轮案例。仓库里的旧客服集成测试还需要原工程的额外依赖和服务。
 
 ## 数据和版本说明
 
 批量评测对应提交 `6368460`。后面我修复了“食欲不好”等表达的识别问题，改成聊天界面，又补了记忆管理。这些改动有各自的测试，但没有重新跑完原来那套在线批量评测，因此这里的均分仍是旧实验版本的结果。相关记录见[修复说明](docs/bugfix_regression.md)和[记忆说明](docs/memory_management.md)。
 
 `results/final/` 保存正式实验；汇总取当前版本指纹下各样本的最新记录，失败尝试也还在。`results/memory/` 是后来单独做的记忆验证，没有混进批量评分。
+
+`results/multiturn_v1_baseline_offline/`、`results/multiturn_v1_auditfix_offline/` 和 `results/multiturn_v1_auditfix_live/` 分别保存新增多轮测试的修复前离线、修复后离线和修复后在线记录。每个目录附输入快照、版本指纹、逐轮结果和汇总。
 
 早期的 A0/A1/A2/A3 表、`full_results.csv` 和旧图是模拟数据。旧 `live_A3_results.csv` 缺少调用记录，评分也有问题，我没有采用它的结论。[8 月方案](docs/proposal.md)保留了最初的设计和后来调整的说明，当前功能以本文为准。
 
