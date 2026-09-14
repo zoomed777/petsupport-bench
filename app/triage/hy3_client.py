@@ -70,6 +70,11 @@ class Hy3TriageClient:
         return cls(base_url, api_key, model, float(os.getenv("HY3_TIMEOUT_SECONDS", "60")))
 
     def _complete(self, system: str, user: str, temperature: float = 0.0) -> str:
+        # This is a conservative local budget proxy, not a Hy3 tokenizer.
+        # Count both system/user input and reserve the configured output budget.
+        budget_units = len(system.encode('utf-8')) + len(user.encode('utf-8')) + 256
+        if budget_units + 4096 > int(os.getenv('HY3_CONTEXT_BUDGET_UNITS', '24000')):
+            raise ValueError('Hy3ContextBudgetExceeded')
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -78,6 +83,7 @@ class Hy3TriageClient:
             extra_body={"thinking": {"type": "disabled"}},
         )
         self.calls.append({"id": response.id, "model": response.model,
+                           "input_budget_units": budget_units, "budget_method": "UTF-8 bytes + 256; not model tokenizer",
                            "usage": response.usage.model_dump() if response.usage else {},
                            "finish_reason": response.choices[0].finish_reason})
         if response.choices[0].finish_reason == "length":

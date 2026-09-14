@@ -14,6 +14,7 @@
 - [判别力、重复性与攻击实验](results/final/validation_summary.json)
 - [闸门来源审计](results/final/gate_audit.jsonl)：区分语义评审和规则命中；次数不等于实际危险回答数
 - [演示录制脚本](docs/demo_script.md)（实际视频见上方链接）
+- [记忆与上下文管理](docs/memory_management.md) · [独立四轮真实调用验证](results/memory/live_validation.json)
 
 ## 场景与实现
 
@@ -30,6 +31,16 @@
 ```
 
 纯订单分支只说明未接入业务系统，没有实际查单或转人工。知识检索是小型知识库关键词匹配；原始客服/RAG代码仍保留用于溯源，但不属于本次Demo运行路径。规则是有限防线，不能保证全部危险输出都被检出。
+
+## 已接入的记忆能力
+
+- 按宠物维护独立档案和事件；明确说名字、另一只猫/狗可切换，归属不明时先确认。
+- 已知年龄、体重及症状可更正，模型上下文使用最新有效值，保留更正记录。
+- 历史折叠为结构化事实摘要；限制近期原文、输入长度和请求预算，关键风险独立保留。
+- 本机SQLite保存与恢复，默认关闭、用户主动开启；新对话继承稳定档案，不继承旧症状。
+- 超过30天的年龄/体重需重新确认；纯订单话题不会带入旧健康事件。
+
+本版完成28项聚焦测试及4轮真实Hy3记忆验证。Token预算使用保守字节代理量，并非官方tokenizer精确计数。本机保存是明文、单用户功能，不是多用户云端记忆服务。视频录制于记忆升级之前，展示聊天主流程，不作为新增记忆功能的验证证据。
 
 ## 运行（Python 3.11）
 
@@ -71,7 +82,7 @@ TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODE
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install pytest
-.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py -q
+.\.venv\Scripts\python.exe -m pytest tests/test_final_submission.py tests/test_memory.py -q
 .\.venv\Scripts\python.exe scripts/smoke_test.py
 .\.venv\Scripts\python.exe scripts/check_submission.py
 ```

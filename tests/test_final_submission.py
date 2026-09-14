@@ -108,7 +108,7 @@ def test_chat_does_not_accept_invented_followup_facts():
     p.client=Client()
     chat.reply('不知道年龄，精神正常',p)
     assert 'age' not in chat.answers
-    assert chat.answers['mental_state']=='正常'
+    assert chat.answers['mental_state']=='精神正常'
     assert 'age' in [q['slot'] for q in chat.pending]
 
 

@@ -2,8 +2,11 @@
 from __future__ import annotations
 import json
 from pathlib import Path
+from uuid import uuid4
 import streamlit as st
 from app.chat_session import ChatSession
+from app.memory import Memory, Pet
+from app.memory_store import MemoryStore
 from app.triage.pipeline import TriagePipeline
 
 ROOT = Path(__file__).resolve().parent
@@ -12,13 +15,60 @@ st.title("🐾 PetSupport")
 st.caption("说说你和宠物遇到的事，我会先了解情况，再帮你梳理下一步。")
 st.caption("个人参赛作品 · 基于 Hy3 · 非腾讯官方项目｜健康科普与就诊准备，不替代兽医诊断。")
 
+if getattr(st.session_state.get('chat_session'), 'version', 0) != 2:
+    st.session_state['chat_session'] = ChatSession()
+    st.session_state['chat_messages'] = []
+st.session_state.setdefault('memory_session_id', uuid4().hex)
+store = None
+
 with st.sidebar:
     st.header("会话设置")
-    if st.button("开始新对话"):
-        st.session_state.pop("chat_session", None)
-        st.session_state.pop("chat_messages", None)
-        st.rerun()
-    st.caption("更换宠物或开始不相关的话题时，请新建对话，避免混用先前信息。")
+    def start_new_conversation():
+        st.session_state['chat_session'] = st.session_state['chat_session'].new_conversation()
+        st.session_state['chat_messages'] = []
+        st.session_state['memory_session_id'] = uuid4().hex
+    st.button("开始新对话", on_click=start_new_conversation)
+    st.caption("可直接说宠物名字、另一只猫/狗，系统会切换；指代不清时会确认。说“新情况”可开始新事件，稳定档案保留。")
+    with st.expander('记忆管理'):
+        st.caption('默认仅当前会话内存。开启后保存到本机SQLite（明文、单用户），不上传GitHub；同一电脑上的使用者可能读取。关闭开关不会删除已有记录。')
+        remember = st.checkbox('在本机保存宠物档案和会话', key='remember_local')
+        current_memory = st.session_state['chat_session'].memory
+        if current_memory.active:
+            st.write('当前宠物：'+current_memory.active.name)
+            st.json(current_memory.active.summary())
+        if remember:
+            try:
+                store = MemoryStore()
+                if not current_memory.pets:
+                    for profile in store.profiles():
+                        current_memory.pets[profile['id']] = Pet(**profile)
+                if st.button('载入已保存宠物档案'):
+                    for profile in store.profiles():
+                        if profile['id'] not in current_memory.pets:
+                            current_memory.pets[profile['id']] = Pet(**profile)
+                    st.success('已载入稳定档案；不会把历史症状带入新咨询。')
+                sessions = store.list_sessions()
+                selected_session = st.selectbox('选择历史会话', [None]+[row[0] for row in sessions],
+                    format_func=lambda value: '请选择' if value is None else next(row[1][:19] for row in sessions if row[0]==value)+' · '+value[:8])
+                def restore_conversation():
+                    saved = store.load(selected_session)
+                    st.session_state['chat_session'] = ChatSession(memory=Memory.from_dict(saved['memory']))
+                    st.session_state['chat_messages'] = saved['messages']
+                    st.session_state['memory_session_id'] = selected_session
+                st.button('恢复所选会话', disabled=selected_session is None, on_click=restore_conversation)
+                if st.button('立即保存当前会话'):
+                    store.save(st.session_state['memory_session_id'], current_memory, st.session_state.get('chat_messages',[]))
+                    st.success('已保存到本机。')
+                confirmed = st.checkbox('确认永久删除本机已保存的全部会话和档案')
+                def forget_local():
+                    store.clear()
+                    st.session_state['chat_session'] = ChatSession()
+                    st.session_state['chat_messages'] = []
+                    st.session_state['memory_session_id'] = uuid4().hex
+                    st.session_state['remember_local'] = False
+                st.button('清除本机记忆', disabled=not confirmed, on_click=forget_local)
+            except Exception as exc:
+                st.warning('本机记忆不可用：'+type(exc).__name__+'；仍可继续当前会话。')
     with st.expander("开发与演示设置"):
         mode = st.radio("模型连接", ["Hy3 在线", "离线规则"])
         st.caption("默认在线。离线模式只运行规则，不调用 Hy3。密钥从本地环境读取。")
@@ -64,7 +114,18 @@ with tab_app:
             with st.spinner("正在了解你的情况…"):
                 reply = session.reply(text, pipeline)
         messages.append({"role": "assistant", **reply})
+        # UI transcript is separate from bounded model context.
+        if len(messages) > 40:
+            del messages[:-40]
+        if store is not None:
+            try:
+                store.save(st.session_state['memory_session_id'], session.memory, messages)
+                st.session_state.pop('memory_save_error', None)
+            except Exception as exc:
+                st.session_state['memory_save_error'] = type(exc).__name__
         st.rerun()
+    if st.session_state.get('memory_save_error'):
+        st.warning('本轮回复已生成，但本机保存失败：'+st.session_state['memory_save_error'])
 
 with tab_eval:
     st.subheader("PetSupport-Bench · 可审计评测")
@@ -72,7 +133,7 @@ with tab_eval:
     path = ROOT / "results/final/summary.json"
     if path.exists():
         summary = json.loads(path.read_text(encoding="utf-8"))
-        st.caption("冻结实验版本：6368460。后续路由和聊天交互修复单独验证，以下不是新版重新评测的成绩。")
+        st.caption("冻结实验版本：6368460。后续路由、聊天和记忆管理单独验证，以下不是新版重新评测的成绩。")
         for col, (name, info) in zip(st.columns(2), summary["configurations"].items()):
             col.metric(name + " 平均分", info["mean"])
             col.write(f'完成评分 {info["scored"]}；闸门触发 {info["gate_count"]}')

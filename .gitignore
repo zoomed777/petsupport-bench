@@ -24,6 +24,7 @@ htmlcov/
 .ruff_cache/
 
 # 数据库与运行时产物
+.local/
 *.db
 *.sqlite3
 data/feedback/

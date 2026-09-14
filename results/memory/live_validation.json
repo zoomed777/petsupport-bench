@@ -1,0 +1,457 @@
+{
+  "created_at": "2026-09-14T01:02:54.936040+00:00",
+  "source": "author-constructed engineering cases",
+  "scope": "four live turns, not a clinical or batch rubric evaluation",
+  "code_sha256": {
+    "app/chat_session.py": "bde6ddddc7cc24bc8815b98804dbd635d412788b3b82d6588f4bbf436d54f6ff",
+    "app/memory.py": "bce77be5575a6e8c0f67469647973bfc316d687dca64634efc806a1842338f9a",
+    "app/memory_store.py": "36bebb4f07dd003254e91d27abc8ac6d033cf58dddf988711f216d439e845b78",
+    "app/triage/hy3_client.py": "1928730ef3e6206379ecda185b6907d416a0c070fb2b05240276c781bf3d017f"
+  },
+  "completed": 4,
+  "passed": 4,
+  "provider_calls": 4,
+  "rows": [
+    {
+      "input": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+      "expected_pet": "豆豆",
+      "expected_age": "3岁",
+      "passed": true,
+      "reply": {
+        "content": "**风险等级**：within_24h\n\n### 情况解读\n根据描述的症状（食欲下降），结合宠物档案综合判断。风险较低，但需观察。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录最后一次进食时间，联系兽医评估\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：豆豆（狗）。\n已确认档案：{\"species\": \"dog\", \"age\": \"3岁\", \"weight_kg\": 6.0}\n本次事件：食欲下降\nsymptom：[\"anorexia\"]\nduration：\"今天\"\nappetite：\"食欲不好\"\nmental_state：\"精神正常\"\n用户本轮描述：狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。\n\n### 说明\n如症状持续或加重，请及时就诊。信息不足：未提供既往病史、体温等，无法进一步评估。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "report": "**风险等级**：within_24h\n\n### 情况解读\n根据描述的症状（食欲下降），结合宠物档案综合判断。风险较低，但需观察。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录最后一次进食时间，联系兽医评估\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：豆豆（狗）。\n已确认档案：{\"species\": \"dog\", \"age\": \"3岁\", \"weight_kg\": 6.0}\n本次事件：食欲下降\nsymptom：[\"anorexia\"]\nduration：\"今天\"\nappetite：\"食欲不好\"\nmental_state：\"精神正常\"\n用户本轮描述：狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。\n\n### 说明\n如症状持续或加重，请及时就诊。信息不足：未提供既往病史、体温等，无法进一步评估。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "audit": {
+          "intent": "health",
+          "collected_slots": {
+            "species": "dog",
+            "symptom": [
+              "anorexia"
+            ],
+            "duration": "今天",
+            "weight_kg": 6.0,
+            "appetite": "食欲不好",
+            "mental_state": "精神正常",
+            "age": "3岁"
+          },
+          "redflag": {
+            "has_emergency": false,
+            "hits": [],
+            "max_level": null,
+            "emergency_prompt": ""
+          },
+          "questions": [],
+          "model_calls": [
+            {
+              "id": "6ca8148d-8ccc-404b-bd15-935c4a30ad7d",
+              "model": "hy3",
+              "input_budget_units": 2130,
+              "budget_method": "UTF-8 bytes + 256; not model tokenizer",
+              "usage": {
+                "completion_tokens": 256,
+                "prompt_tokens": 486,
+                "total_tokens": 742,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": null,
+                  "audio_tokens": null,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": null,
+                  "text_tokens": null
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": null,
+                  "cache_write_tokens": null,
+                  "cached_tokens": 0,
+                  "image_tokens": null,
+                  "text_tokens": null
+                }
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "errors": [],
+          "blocked_fields": [],
+          "memory": {
+            "pet_id": "a512d71333a44bfa8caaa0af8bf8d642",
+            "pet_name": "豆豆",
+            "event_id": "d6b4a4e89523",
+            "summary": {
+              "pet": "豆豆",
+              "profile": {
+                "species": "dog",
+                "age": "3岁",
+                "weight_kg": 6.0
+              },
+              "event": {
+                "symptom": [
+                  "anorexia"
+                ],
+                "duration": "今天",
+                "appetite": "食欲不好",
+                "mental_state": "精神还可以"
+              },
+              "unresolved_risks": [],
+              "pending": []
+            },
+            "corrections": [],
+            "fact_sources": {
+              "symptom": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "duration": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "appetite": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "mental_state": "回到豆豆，精神还可以。"
+            },
+            "profile_updated_at": {
+              "species": "2026-09-14T01:02:41.378891+00:00",
+              "age": "2026-09-14T01:02:41.380893+00:00",
+              "weight_kg": "2026-09-14T01:02:41.381892+00:00"
+            },
+            "retained_turns": 1,
+            "folded_turns": 0,
+            "context_units": 326,
+            "context_limit": 10000,
+            "budget_method": "UTF-8 bytes; conservative proxy, not Hy3 tokenizer"
+          }
+        }
+      }
+    },
+    {
+      "input": "年龄说错了，不是3岁，是5岁，体重实际5公斤。",
+      "expected_pet": "豆豆",
+      "expected_age": "5岁",
+      "passed": true,
+      "reply": {
+        "content": "已更新体重（公斤），后续以最新信息为准。\n\n**风险等级**：within_24h\n\n### 情况解读\n根据描述的症状（食欲下降），结合宠物档案综合判断。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录最后一次进食时间，联系兽医评估\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：豆豆（狗）。\n已确认档案：{\"species\": \"dog\", \"age\": \"5岁\", \"weight_kg\": 5.0}\n本次事件：食欲下降\nsymptom：[\"anorexia\"]\nduration：\"今天\"\nappetite：\"食欲不好\"\nmental_state：\"精神正常\"\n用户本轮描述：5岁，体重实际5公斤。\n\n### 说明\n如症状持续或加重，请及时就诊。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "report": "**风险等级**：within_24h\n\n### 情况解读\n根据描述的症状（食欲下降），结合宠物档案综合判断。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录最后一次进食时间，联系兽医评估\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：豆豆（狗）。\n已确认档案：{\"species\": \"dog\", \"age\": \"5岁\", \"weight_kg\": 5.0}\n本次事件：食欲下降\nsymptom：[\"anorexia\"]\nduration：\"今天\"\nappetite：\"食欲不好\"\nmental_state：\"精神正常\"\n用户本轮描述：5岁，体重实际5公斤。\n\n### 说明\n如症状持续或加重，请及时就诊。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "audit": {
+          "intent": "health",
+          "collected_slots": {
+            "species": "dog",
+            "symptom": [
+              "anorexia"
+            ],
+            "duration": "今天",
+            "weight_kg": 5.0,
+            "appetite": "食欲不好",
+            "mental_state": "精神正常",
+            "age": "5岁"
+          },
+          "redflag": {
+            "has_emergency": false,
+            "hits": [],
+            "max_level": null,
+            "emergency_prompt": ""
+          },
+          "questions": [],
+          "model_calls": [
+            {
+              "id": "daf62d1b-3f6e-49da-93c3-f7773aa7a4d0",
+              "model": "hy3",
+              "input_budget_units": 2085,
+              "budget_method": "UTF-8 bytes + 256; not model tokenizer",
+              "usage": {
+                "completion_tokens": 224,
+                "prompt_tokens": 475,
+                "total_tokens": 699,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": null,
+                  "audio_tokens": null,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": null,
+                  "text_tokens": null
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": null,
+                  "cache_write_tokens": null,
+                  "cached_tokens": 0,
+                  "image_tokens": null,
+                  "text_tokens": null
+                }
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "errors": [],
+          "blocked_fields": [],
+          "memory": {
+            "pet_id": "a512d71333a44bfa8caaa0af8bf8d642",
+            "pet_name": "豆豆",
+            "event_id": "d6b4a4e89523",
+            "summary": {
+              "pet": "豆豆",
+              "profile": {
+                "species": "dog",
+                "age": "5岁",
+                "weight_kg": 5.0
+              },
+              "event": {
+                "symptom": [
+                  "anorexia"
+                ],
+                "duration": "今天",
+                "appetite": "食欲不好",
+                "mental_state": "精神还可以"
+              },
+              "unresolved_risks": [],
+              "pending": []
+            },
+            "corrections": [
+              {
+                "field": "age",
+                "old": "3岁",
+                "new": "5岁",
+                "quote": "5岁，体重实际5公斤。",
+                "at": "2026-09-14T01:02:45.951569+00:00"
+              },
+              {
+                "field": "weight_kg",
+                "old": 6.0,
+                "new": 5.0,
+                "quote": "5岁，体重实际5公斤。",
+                "at": "2026-09-14T01:02:45.951569+00:00"
+              }
+            ],
+            "fact_sources": {
+              "symptom": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "duration": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "appetite": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "mental_state": "回到豆豆，精神还可以。"
+            },
+            "profile_updated_at": {
+              "species": "2026-09-14T01:02:41.378891+00:00",
+              "age": "2026-09-14T01:02:45.951569+00:00",
+              "weight_kg": "2026-09-14T01:02:45.951569+00:00"
+            },
+            "retained_turns": 2,
+            "folded_turns": 0,
+            "context_units": 281,
+            "context_limit": 10000,
+            "budget_method": "UTF-8 bytes; conservative proxy, not Hy3 tokenizer"
+          }
+        }
+      }
+    },
+    {
+      "input": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。",
+      "expected_pet": "咪咪",
+      "expected_age": "1岁",
+      "passed": true,
+      "reply": {
+        "content": "**风险等级**：home_care\n\n### 情况解读\n根据描述的症状（腹泻/软便），结合宠物档案综合判断，风险较低，为家庭护理级别。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录排便次数与性状（软便/水样/带血/黏液）\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：咪咪（猫）。已确认档案：物种猫，年龄1岁。本次事件：拉稀。症状：腹泻。持续时间：今天。频率：两次。食欲：正常。精神：正常。用户描述：另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。\n\n### 说明\n如症状持续或加重，请及时就诊。信息有限，仅基于用户提供内容，未做体格检查。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "report": "**风险等级**：home_care\n\n### 情况解读\n根据描述的症状（腹泻/软便），结合宠物档案综合判断，风险较低，为家庭护理级别。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录排便次数与性状（软便/水样/带血/黏液）\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：咪咪（猫）。已确认档案：物种猫，年龄1岁。本次事件：拉稀。症状：腹泻。持续时间：今天。频率：两次。食欲：正常。精神：正常。用户描述：另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。\n\n### 说明\n如症状持续或加重，请及时就诊。信息有限，仅基于用户提供内容，未做体格检查。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "audit": {
+          "intent": "health",
+          "collected_slots": {
+            "species": "cat",
+            "symptom": [
+              "diarrhea"
+            ],
+            "duration": "今天",
+            "appetite": "食欲正常",
+            "mental_state": "精神正常",
+            "age": "1岁",
+            "frequency": "两次"
+          },
+          "redflag": {
+            "has_emergency": false,
+            "hits": [],
+            "max_level": null,
+            "emergency_prompt": ""
+          },
+          "questions": [],
+          "model_calls": [
+            {
+              "id": "7d6e2880-72f1-47c3-943b-393fbb065c3f",
+              "model": "hy3",
+              "input_budget_units": 2175,
+              "budget_method": "UTF-8 bytes + 256; not model tokenizer",
+              "usage": {
+                "completion_tokens": 226,
+                "prompt_tokens": 497,
+                "total_tokens": 723,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": null,
+                  "audio_tokens": null,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": null,
+                  "text_tokens": null
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": null,
+                  "cache_write_tokens": null,
+                  "cached_tokens": 0,
+                  "image_tokens": null,
+                  "text_tokens": null
+                }
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "errors": [],
+          "blocked_fields": [],
+          "memory": {
+            "pet_id": "26180f89a370443f8efc3541e8f71b69",
+            "pet_name": "咪咪",
+            "event_id": "6a50af9e622a",
+            "summary": {
+              "pet": "咪咪",
+              "profile": {
+                "species": "cat",
+                "age": "1岁"
+              },
+              "event": {
+                "symptom": [
+                  "diarrhea"
+                ],
+                "duration": "今天",
+                "appetite": "食欲正常",
+                "mental_state": "精神正常",
+                "frequency": "两次"
+              },
+              "unresolved_risks": [],
+              "pending": []
+            },
+            "corrections": [],
+            "fact_sources": {
+              "symptom": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。",
+              "duration": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。",
+              "appetite": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。",
+              "mental_state": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。",
+              "frequency": "另一只猫叫咪咪，1岁，今天拉稀两次，食欲正常，精神正常。"
+            },
+            "profile_updated_at": {
+              "species": "2026-09-14T01:02:48.939123+00:00",
+              "age": "2026-09-14T01:02:48.939123+00:00"
+            },
+            "retained_turns": 1,
+            "folded_turns": 0,
+            "context_units": 331,
+            "context_limit": 10000,
+            "budget_method": "UTF-8 bytes; conservative proxy, not Hy3 tokenizer"
+          }
+        }
+      }
+    },
+    {
+      "input": "回到豆豆，精神还可以。",
+      "expected_pet": "豆豆",
+      "expected_age": "5岁",
+      "passed": true,
+      "reply": {
+        "content": "已更新精神状态怎么样，后续以最新信息为准。\n\n**风险等级**：within_24h\n\n### 情况解读\n根据描述的症状（食欲下降），结合宠物档案综合判断。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录最后一次进食时间，联系兽医评估\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：豆豆（狗）。\n已确认档案：{\"species\": \"dog\", \"age\": \"5岁\", \"weight_kg\": 5.0}\n本次事件：食欲下降\nsymptom：[\"anorexia\"]\nduration：\"今天\"\nappetite：\"食欲不好\"\nmental_state：\"精神还可以\"\n用户本轮描述：回到豆豆，精神还可以。\n\n### 说明\n如症状持续或加重，请及时就诊。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "report": "**风险等级**：within_24h\n\n### 情况解读\n根据描述的症状（食欲下降），结合宠物档案综合判断。\n\n### 现在该做什么\n- 记录症状出现的时间、频率与变化\n- 记录最后一次进食时间，联系兽医评估\n- 若 24 小时内无改善或出现加重，预约就诊\n\n### 不要做的事\n- 不要自行喂人用药物\n- 饮食与处置按兽医意见安排，勿强行灌喂\n\n### 给兽医的就诊摘要（可直接出示）\n> 主诉：当前宠物：豆豆（狗）。\n已确认档案：{\"species\": \"dog\", \"age\": \"5岁\", \"weight_kg\": 5.0}\n本次事件：食欲下降\nsymptom：[\"anorexia\"]\nduration：\"今天\"\nappetite：\"食欲不好\"\nmental_state：\"精神还可以\"\n用户本轮描述：回到豆豆，精神还可以。\n\n### 说明\n如症状持续或加重，请及时就诊。\n\n---\n以上内容为健康科普与就医准备参考，不替代执业兽医诊断。",
+        "audit": {
+          "intent": "health",
+          "collected_slots": {
+            "species": "dog",
+            "symptom": [
+              "anorexia"
+            ],
+            "duration": "今天",
+            "appetite": "食欲不好",
+            "mental_state": "精神还可以",
+            "age": "5岁",
+            "weight_kg": 5.0
+          },
+          "redflag": {
+            "has_emergency": false,
+            "hits": [],
+            "max_level": null,
+            "emergency_prompt": ""
+          },
+          "questions": [],
+          "model_calls": [
+            {
+              "id": "391677e6-9400-415c-87ef-1d44f994cd55",
+              "model": "hy3",
+              "input_budget_units": 2095,
+              "budget_method": "UTF-8 bytes + 256; not model tokenizer",
+              "usage": {
+                "completion_tokens": 223,
+                "prompt_tokens": 474,
+                "total_tokens": 697,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": null,
+                  "audio_tokens": null,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": null,
+                  "text_tokens": null
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": null,
+                  "cache_write_tokens": null,
+                  "cached_tokens": 0,
+                  "image_tokens": null,
+                  "text_tokens": null
+                }
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "errors": [],
+          "blocked_fields": [],
+          "memory": {
+            "pet_id": "a512d71333a44bfa8caaa0af8bf8d642",
+            "pet_name": "豆豆",
+            "event_id": "d6b4a4e89523",
+            "summary": {
+              "pet": "豆豆",
+              "profile": {
+                "species": "dog",
+                "age": "5岁",
+                "weight_kg": 5.0
+              },
+              "event": {
+                "symptom": [
+                  "anorexia"
+                ],
+                "duration": "今天",
+                "appetite": "食欲不好",
+                "mental_state": "精神还可以"
+              },
+              "unresolved_risks": [],
+              "pending": []
+            },
+            "corrections": [
+              {
+                "field": "age",
+                "old": "3岁",
+                "new": "5岁",
+                "quote": "5岁，体重实际5公斤。",
+                "at": "2026-09-14T01:02:45.951569+00:00"
+              },
+              {
+                "field": "weight_kg",
+                "old": 6.0,
+                "new": 5.0,
+                "quote": "5岁，体重实际5公斤。",
+                "at": "2026-09-14T01:02:45.951569+00:00"
+              },
+              {
+                "field": "mental_state",
+                "old": "精神正常",
+                "new": "精神还可以",
+                "quote": "回到豆豆，精神还可以。",
+                "at": "2026-09-14T01:02:52.009831+00:00"
+              }
+            ],
+            "fact_sources": {
+              "symptom": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "duration": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "appetite": "狗叫豆豆，3岁，体重6公斤，今天食欲不好，精神正常。",
+              "mental_state": "回到豆豆，精神还可以。"
+            },
+            "profile_updated_at": {
+              "species": "2026-09-14T01:02:41.378891+00:00",
+              "age": "2026-09-14T01:02:45.951569+00:00",
+              "weight_kg": "2026-09-14T01:02:45.951569+00:00"
+            },
+            "retained_turns": 3,
+            "folded_turns": 0,
+            "context_units": 288,
+            "context_limit": 10000,
+            "budget_method": "UTF-8 bytes; conservative proxy, not Hy3 tokenizer"
+          }
+        }
+      }
+    }
+  ]
+}
