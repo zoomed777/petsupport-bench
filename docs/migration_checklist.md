@@ -1,45 +1,38 @@
-# 迁移清单：从 customer-support-agent-main 迁移到 petsupport-bench
+# 旧客服工程和本项目的关系
 
-> 前提：`customer-support-agent-main` 目前**不是 git 仓库**（已确认），不存在历史密钥泄漏风险。
-> 参赛仓库全新 `git init`，只复制下列白名单内容，`.env` 一律不复制。
+这次不是完全从零开始。我从 `customer-support-agent-main` 迁入了一部分客服代码，再围绕宠物咨询和开放式评测继续开发。本机的 Java 商城工程 `zoomed` 没有作为完整工程放进参赛仓库，当前 Demo 也不需要它。
 
-## 一、复制（白名单）
+最初考虑过接回商城，最后先完成了独立聊天应用，没有做真实商城集成。下面说明哪些旧代码保留了、哪些接入了当前流程，以及换一台电脑运行需要什么。
 
-| 来源 | 去向 | 说明 |
+## 留下来的旧内容
+
+| 内容 | 为什么保留 | 当前是否使用 |
 |---|---|---|
-| `app/`（agents / api / core / services / models） | `app/` | ReAct 循环、ask_user、escalate_human、RAG 管线、mock 业务 API |
-| `app/knowledge/pet_care.md` | 归档参考 | 内容已并入 `data/knowledge_base.jsonl`（结构化+来源），后续以 JSONL 为准 |
-| `prompts/`（react_v1/v2 等） | `prompts/` | 保留 A/B prompt 基础，新增意图路由与分诊 prompt |
-| `tests/` 中与 Agent 核心相关的用例 | `tests/` | 确认无真实数据后保留 |
-| `pyproject.toml`（依赖清单） | 根目录 | 检查依赖最小化 |
+| `app/agents/` 中的旧 Agent 和工具 | 便于查看原客服实现 | 当前聊天不走旧 ReAct、Redis 会话链路 |
+| `app/api/`、`app/main.py`、旧页面 | 保留原 API 工程 | 不是当前演示入口 |
+| `app/services/` 中的向量检索、重排等 | 保留旧检索实现 | 当前知识卡片用关键词匹配 |
+| 旧测试和 `pyproject.toml` | 保留工程来源和依赖信息 | 旧集成测试需要额外服务，不属于当前聚焦测试范围 |
 
-## 二、删除（不进参赛仓库）
+当前实际使用的代码包括 `streamlit_demo.py`、`app/chat_session.py`、`app/triage/`、`app/guardrails/`、`app/memory.py`、`app/memory_store.py` 及相关模型、配置。更完整的文件说明见[代码与文件说明](submission_scope.md)。
 
-- [ ] `venv/`、`.pytest_cache/`、`*.egg-info/`、`uv.lock`（如锁定本地路径）
-- [ ] `.env`、`.env.docker`、`.env.llmtest`（**含真实 API Key，绝不复制**）
-- [ ] `csdn_publish.md`、`INTERVIEW_LOG.md`、`PROBLEMS_AND_SOLUTIONS.md` 等个人文档
-- [ ] `eval_react_100.json`（旧评测数据，确认是否含真实工单；如含则脱敏或弃用）
-- [ ] `data/feedback.db` 等运行时产物（.gitignore 已覆盖）
+## 这次补的内容
 
-## 三、改造
+- 用环境变量配置 Hy3，仓库只提供 `.env.example`。
+- 处理健康描述和订单问题混在一起的输入，缺信息时在聊天里继续追问。
+- 加入已知风险规则、输出检查和结构化报告。
+- 按宠物管理档案和事件，支持纠错、上下文预算和本机保存。
+- 构造评测样本，设计七维评分并保存真实输出与验证结果。
 
-- [ ] `.env` 三件套切 Hy3：`SUPPORT_AGENT_LLM_BASE_URL / REPLY_MODEL / API_KEY`（见 `.env.example`）
-- [ ] 新增意图路由：健康类消息进入分诊管线（`app/` 内新模块）
-- [ ] 新增红旗规则引擎：加载 `config/redflag_rules.json`，命中即强制急诊提示前置 + escalate
-- [ ] 新增红线词校验：确诊/开药/剂量/人药模式检测，写入输出 `boundary_violations`
-- [ ] 五区块结构化输出 schema（`app/models/schemas.py` 扩展）
-- [ ] `streamlit_demo.py` 独立演示界面（不依赖 Java 商城）
+真实订单、物流、库存和人工接管没有接入。旧代码里有相关工具，不代表当前页面就能完成这些操作。
 
-## 四、开源前检查（逐项打勾）
+## 没有一起上传的本机文件
 
-- [ ] 全仓库扫描无硬编码密钥：`grep -rn "sk-" --include="*.py" --include="*.md" --include="*.json"` 为空
-- [ ] `.gitignore` 覆盖 `.env`（本仓库已配好，复制后确认）
-- [ ] README 顶部含「个人参赛作品｜犀牛鸟开源·混元大语言模型实战任务｜非腾讯官方项目」声明
-- [ ] README 说明应用层基于本人此前开发的 PetHub 客服系统改造（归属清晰）
-- [ ] 健康免责声明：README + 应用输出均有
-- [ ] 干净环境复现：新建 venv → `pip install` → 配 `.env` → mock API + demo 跑通
+密钥配置、虚拟环境、依赖安装目录、个人聊天数据库、缓存和日志都不随仓库发布。它们不是缺失的项目源码，运行时按 README 安装依赖、填写自己的配置即可。
 
-## 五、zoomed（Java 商城）处理
+这份迁移说明不要求删除本机旧工程或原始文件。忽略规则见[.gitignore](../.gitignore)，提交检查脚本为 `scripts/check_submission.py`。扫描只是检查手段，不能保证任何形式的凭据泄漏都能被发现；如果密钥曾经公开，需要撤销并更换。
 
-**不进参赛仓库。** 仅在 2 分钟 demo 视频中出现（商城客服窗口 → Agent 对话的真实集成画面），
-README「致谢与来源说明」中提一句"已集成于 PetHub 商城"即可。
+## 换台电脑如何运行
+
+直接按 [README](../README.md)使用 Python 3.11 安装 `requirements-demo.txt`，配置 Hy3 后启动 `streamlit_demo.py`。不需要复制我本机的 `zoomed`、`customer-support-agent-main`、虚拟环境或私人数据库。
+
+[演示视频](../demo/demo.mp4)录的是独立聊天页面，不是商城后台集成演示。

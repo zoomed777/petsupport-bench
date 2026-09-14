@@ -1,76 +1,79 @@
 # PetSupport-Bench
 
-> 个人参赛作品｜犀牛鸟开源·混元大语言模型实战任务一｜非腾讯官方项目
->
-> 宠物商城健康沟通与可信评测原型。健康输出仅为科普与就诊准备，不替代兽医诊断，不提供处方或剂量。
+个人参赛作品｜犀牛鸟开源·混元大语言模型实战任务一｜非腾讯官方项目
 
-## 项目介绍
+## 我做的是什么
 
-PetSupport-Bench由两部分组成：**一个可运行的宠物咨询聊天应用，以及一套判断其开放式回答质量的评测方法**。应用针对订单/商品咨询中混杂宠物健康描述的场景，自动识别诉求、对已识别风险优先回应、连续追问并生成就诊准备报告；评测侧公开七维标准、构造样本、原始输出、方法验证与失败分析。
+这是一个基于 Hy3 的宠物咨询 Agent，也包含一套评价它的回答质量的方法。我在之前的宠物商城客服项目上继续改造，没有训练或微调模型。
 
-项目在既有客服工程基础上改造，模型能力由Hy3提供，不涉及训练或微调。当前完成范围是可交付的参赛研究原型，不是已上线商城客服或临床诊疗系统。
+我关注的是一类容易被普通客服忽略的问题：用户在问订单、商品的时候，顺带提到了宠物身体不舒服。比如“换的猫粮什么时候到？我家猫最近食欲不好”。系统需要同时理解这两件事，发现已知风险时先回应，信息不够时继续问，再整理成主人能看懂的建议和就诊准备材料。
 
-**导师建议先读：[项目说明](docs/project_overview.md) → [交付范围与未提交内容](docs/submission_scope.md) → [实验报告](docs/experiment_report.md)。** 当前应用源码已提交；密钥、依赖安装目录和本机私人数据按规则排除。旧模块“未接入”与源码“未提交”是不同情况。
+这类问题没有唯一标准答案，所以我除了做聊天应用，也做了七维评分标准、构造样本和评测脚本，检查回答质量以及评分方法本身的问题。健康内容只用于科普和就诊准备，不替代兽医诊断，不提供处方或药物剂量。
 
-## 导师与评委阅读入口
+目前应用、样本、评测结果、报告和视频都已放在仓库。给导师看的整体说明在[项目介绍](docs/project_overview.md)，哪些文件上传了、哪些没有上传，写在[代码与文件说明](docs/submission_scope.md)。
 
-- [观看演示视频（MP4，约68秒）](demo/demo.mp4)
-- [最终实验报告](docs/experiment_report.md)：真实结果、典型失败、限制
-- [七维评估方法](docs/evaluation_protocol.md)
-- [最终结果汇总](results/final/summary.json) · [完整评分表](results/final/results.csv)
-- [逐条输出与调用记录](results/final/traces.jsonl)
-- [判别力、重复性与攻击实验](results/final/validation_summary.json)
-- [闸门来源审计](results/final/gate_audit.jsonl)：区分语义评审和规则命中；次数不等于实际危险回答数
-- [演示录制脚本](docs/demo_script.md)（实际视频见上方链接）
-- [记忆与上下文管理](docs/memory_management.md) · [独立四轮真实调用验证](results/memory/live_validation.json)
+## 可以先看这些
 
-## 场景与实现
+- [演示视频](demo/demo.mp4)：约 68 秒，展示聊天主流程。
+- [实验报告](docs/experiment_report.md)：结果、失败案例和我的分析。
+- [评估方法](docs/evaluation_protocol.md)：七个维度怎么打分。
+- [完整评分表](results/final/results.csv) · [汇总数据](results/final/summary.json) · [逐条输出和调用记录](results/final/traces.jsonl)。
+- [方法验证结果](results/final/validation_summary.json)：好中差排序、重复评分和对抗测试。
+- [闸门触发记录](results/final/gate_audit.jsonl)：哪些是模型评审判断，哪些是规则命中。
+- [记忆管理](docs/memory_management.md) · [四轮真实 Hy3 验证](results/memory/live_validation.json)。
+- [录制参考脚本](docs/demo_script.md)。
 
-用户在订单或商品咨询中夹带“误食”“不能排尿”等描述时，系统优先响应风险，收集缺失信息，并提供就诊准备材料。开放式回复的质量取决于安全性、证据和沟通，而非匹配唯一标准答案。
+## 应用怎么工作
 
-当前演示入口是 `streamlit_demo.py`：直接输入自然语言的聊天窗口、自动意图识别、对话内追问、历史消息、报告下载及折叠调用记录。无需选择场景类型或填写宠物档案表单，也无需 Java 商城、Redis、向量模型或真实业务数据库。聊天适配与验证见 [聊天交互说明](docs/chat_demo.md)。
+当前入口是 `streamlit_demo.py`。用户直接在聊天框输入，不需要先选“健康”还是“订单”，也不用填写宠物档案表。系统会自动判断、追问，保留对话，并提供报告下载和每轮调用记录。具体交互见[聊天说明](docs/chat_demo.md)。
 
 ```text
-用户消息 + 本次对话内已提供的信息
-  → 意图规则（低置信时可调用 Hy3）
-  → 红旗检测 → 紧急提示 / 关键信息追问
-  → 知识卡片 + Hy3 文案增强（仅适用路径调用）
-  → 字段红线检查 → 报告 / 追问 / 业务能力说明
+用户消息 + 当前宠物档案和事件
+  → 判断意图，检查已知紧急风险
+  → 信息不足时追问
+  → 匹配知识卡片，适用时调用 Hy3 整理文字
+  → 检查输出，返回报告、追问或业务能力说明
 ```
 
-纯订单分支只说明未接入业务系统，没有实际查单或转人工。知识检索是小型知识库关键词匹配；原始客服/RAG代码仍保留用于溯源，但不属于本次Demo运行路径。规则是有限防线，不能保证全部危险输出都被检出。
+有些回复由规则直接给出，不会调用 Hy3，页面会标明这一轮的实际情况。
 
-## 已接入的记忆能力
+现在还没接真实商城后台，所以不能查订单、物流、库存或直接转人工。知识库只有 8 条带来源的简短内容，用关键词匹配；旧客服工程中的向量检索和 Redis 模块虽然留在仓库里，但没有接入这条聊天流程。运行当前演示不需要 Java 商城、Redis 或业务数据库。
 
-- 按宠物维护独立档案和事件；明确说名字、另一只猫/狗可切换，归属不明时先确认。
-- 已知年龄、体重及症状可更正，模型上下文使用最新有效值，保留更正记录。
-- 历史折叠为结构化事实摘要；限制近期原文、输入长度和请求预算，关键风险独立保留。
-- 本机SQLite保存与恢复，默认关闭、用户主动开启；新对话继承稳定档案，不继承旧症状。
-- 超过30天的年龄/体重需重新确认；纯订单话题不会带入旧健康事件。
+## 记忆做到哪一步了
 
-本版完成28项聚焦测试及4轮真实Hy3记忆验证。Token预算使用保守字节代理量，并非官方tokenizer精确计数。本机保存是明文、单用户功能，不是多用户云端记忆服务。视频录制于记忆升级之前，展示聊天主流程，不作为新增记忆功能的验证证据。
+- 按宠物保存档案和当前事件。明确说名字或另一只猫、狗时可以切换，归属不清楚时先确认。
+- 年龄、体重、症状说错后可以更正，后续使用最新有效信息，并保留更正记录。
+- 长历史整理成结构化事实摘要，同时限制近期原文、输入长度和请求预算，尚未排除的风险单独保留。
+- 可以主动开启本机 SQLite 保存和恢复；新对话保留稳定档案，不沿用旧症状。
+- 年龄、体重超过 30 天需要重新确认；单独问订单时不会带入旧健康事件。
 
-## 运行（Python 3.11）
+这部分完成了 28 项聚焦测试和 4 轮真实 Hy3 验证。上下文预算用字节数保守估算，不是 Hy3 官方 tokenizer 的精确计数。本机数据库没有加密，也没做多用户登录隔离。视频录得较早，还没有展示后面补上的记忆功能。
 
-Windows PowerShell，在仓库目录执行：
+## 如何运行
+
+我验证使用的是 Python 3.11。在仓库目录打开 Windows PowerShell：
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-demo.txt
 Copy-Item .env.example .env
-# 编辑本地 .env，填入 HY3_BASE_URL、HY3_API_KEY、HY3_MODEL
+# 打开本地 .env，填写 HY3_BASE_URL、HY3_API_KEY、HY3_MODEL
 .\.venv\Scripts\python.exe -m streamlit run streamlit_demo.py --server.address 127.0.0.1
 ```
 
-已安装依赖的本机可双击 `start_demo.cmd`。浏览器访问 http://127.0.0.1:8501 。Linux/macOS 使用 `.venv/bin/python` 替换解释器路径。
+浏览器访问 [本机演示页面](http://127.0.0.1:8501/)。依赖装好后也可以双击 `start_demo.cmd`。Linux/macOS 把解释器路径替换成 `.venv/bin/python`。
 
-TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODEL=hy3`；密钥仅保存在本地 `.env`。默认在线，API不可用时可在侧栏“开发与演示设置”选择“离线规则”，每轮实际调用情况会在回复下方说明。
+TokenHub 配置示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODEL=hy3`。密钥只放在本机 `.env`，不要上传。默认使用在线模式；暂时没有可用 API 时，可以在侧栏“开发与演示设置”选择“离线规则”，先看交互流程。
 
-如果旧Anaconda环境安装时报代理/TLS错误，使用Python 3.11的独立环境。可在当前PowerShell临时设置 `$env:NO_PROXY='*'` 后通过官方HTTPS源安装：
-` .\.venv\Scripts\python.exe -m pip install -i https://pypi.org/simple -r requirements-demo.txt `。
-无需使用HTTP源或关闭证书校验。
+如果旧 Anaconda 环境安装时遇到代理或 TLS 错误，可以换 Python 3.11 的独立环境，并尝试官方 HTTPS 源：
 
-## 复现实验
+```powershell
+.\.venv\Scripts\python.exe -m pip install -i https://pypi.org/simple -r requirements-demo.txt
+```
+
+如果确认是本机代理配置引起的问题，而且网络允许直连，可在当前 PowerShell 临时设置 `$env:NO_PROXY='*'` 后再安装。不需要改用 HTTP 源或关闭证书校验。
+
+## 如何复现实验
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/final_eval.py
@@ -78,15 +81,15 @@ TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODE
 .\.venv\Scripts\python.exe scripts/analyze_final.py
 ```
 
-- 固定数据：`data/cases_final.jsonl`，100条作者构造样本、39种不同表达，包含25条混合/诱导/长文本难例。不是临床病例集，标签不是兽医金标准。
-- A0：直接Hy3回复；A3：规则、追问、知识卡片与Hy3增强。仅评第一轮，不能称为多轮或单组件消融。
-- 七维Judge对最终文字盲评（不提供配置名），药物红线另用规则核验。所有维度必须有具体理由。
-- 记录请求ID、模型、用量、原始输出、失败、评分和输入/代码哈希。支持续跑；失败不会伪装成成功。
-- 判别力：4种情境的好/中/差输出；一致性：同输出3次评审；对抗：伪引用和评分指令注入。
-- 同一Hy3生成/评审存在共同偏差；重复性不等于人工一致性。最终报告如实保留低分和失败。
-- 实验发现长否定句的规则误报，原评分保持冻结并公开审计；不能用闸门触发差异宣称实际安全风险下降。
+这批实验使用 `data/cases_final.jsonl` 中的 100 条构造样本，共 39 种不同表达，其中 25 条涉及混合意图、诱导或长文本干扰。样本不是实际病例，标签也没有经过兽医标注。
 
-## 验证
+我比较了 A0（直接让 Hy3 回复）和 A3（规则、追问、知识卡片加 Hy3）。只评第一轮，两组同时改变了多个组件，因此这不是完整的多轮测试，也不能单独说明某一个组件的贡献。
+
+评审使用同一 Hy3，评分时不提供配置名称。七个维度都要给出理由，药物红线另用规则检查。脚本保存请求 ID、模型、用量、原始输出、评分、错误和版本指纹，并支持续跑。在线重跑会消耗 API 额度；读取已有缓存不等于发起了新请求。
+
+A0 均分为 83.70，A3 为 78.78。完整方案这次没有在总分上超过直接回复。我还发现评分规则会误判长否定句，所以闸门触发从 17 次到 4 次，不能直接解释成危险回答减少。分析和原始分歧都保留在报告里。
+
+## 如何检查当前代码
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install pytest
@@ -95,19 +98,16 @@ TokenHub 示例：`HY3_BASE_URL=https://tokenhub.tencentmaas.com/v1`、`HY3_MODE
 .\.venv\Scripts\python.exe scripts/check_submission.py
 ```
 
-仅上述测试覆盖最终参赛路径。旧客服系统的集成测试需要其原有额外依赖和服务。
+这些测试针对本次参赛应用。仓库里的旧客服集成测试还需要原工程的额外依赖和服务。
 
-## 数据与版本说明
+## 数据和版本说明
 
-最终批量评测对应提交 `6368460`。此后的演示修复补充了“食欲不好”等表达的混合意图识别，并增加原句端到端回归测试（见 [修复验证](docs/bugfix_regression.md)）；未对修复版重新运行整套在线评测，因此原分数只代表冻结实验版本，不能作为修复版的新成绩。
+批量评测对应提交 `6368460`。后面我修复了“食欲不好”等表达的识别问题，改成聊天界面，又补了记忆管理。这些改动有各自的测试，但没有重新跑完原来那套在线批量评测，因此这里的均分仍是旧实验版本的结果。相关记录见[修复说明](docs/bugfix_regression.md)和[记忆说明](docs/memory_management.md)。
 
-`docs/proposal.md` 是8月方案，包含当时计划中的功能，完成范围以本文与最终报告为准。
-旧 `results/A*_results.csv`、`full_results.csv` 及旧图是模拟结果。
-旧 `live_A3_results.csv` 没有调用审计且评分有问题，均不能作为最终实验结论。
-正式结果只读取 `results/final/`；该目录保留失败尝试，汇总以当前哈希下最新记录为准。
+`results/final/` 保存正式实验；汇总取当前版本指纹下各样本的最新记录，失败尝试也还在。`results/memory/` 是后来单独做的记忆验证，没有混进批量评分。
 
-`results/memory/`为后续记忆功能的独立验证，不与上述批量评分合并。详细版本及提交范围见[交付说明](docs/submission_scope.md)。
+早期的 A0/A1/A2/A3 表、`full_results.csv` 和旧图是模拟数据。旧 `live_A3_results.csv` 缺少调用记录，评分也有问题，我没有采用它的结论。[8 月方案](docs/proposal.md)保留了最初的设计和后来调整的说明，当前功能以本文为准。
 
-知识库8条简短转述附FDA、ASPCA、Cornell和Merck具体页面链接，见 `data/knowledge_base.jsonl`。只做有限来源核对，不声称临床认证。模型调用使用[Hy3](https://github.com/Tencent-Hunyuan/Hy3)，没有训练或微调。
+知识卡片在 `data/knowledge_base.jsonl`，附有 FDA、ASPCA、Cornell 和 Merck 的具体页面链接，覆盖范围还很小。模型调用通过 [Hy3](https://github.com/Tencent-Hunyuan/Hy3) 完成。
 
-代码基于作者此前宠物商城客服项目改造。MIT许可证适用于本仓库原创代码与构造样本；第三方资料权利归原作者，链接与短摘要不代表其为本项目背书。
+代码是在我之前的宠物商城客服项目上改造的。MIT 许可证适用于本仓库原创代码与构造样本；第三方资料的权利仍归原作者，引用来源不代表对方认可本项目。

@@ -1,55 +1,57 @@
-# 交付范围与未提交内容说明
+# 代码与文件说明
 
-核对日期：2026-09-14。功能基线：`dcb9aabd1b1e1f35e97f930153b1a96606d11e7d`。本次导师说明是该功能版本之后的文档补充。
+更新日期：2026-09-14。当前功能版本为 `dcb9aab`，后续提交主要整理说明文档。
 
-## 1. 是否有漏交代码？
+## 一、代码有没有漏交
 
-核对时，`petsupport-bench`工作区无待提交文件，本地HEAD与GitHub的main均为上述提交；未发现排除虚拟环境、依赖和缓存目录之外，被忽略的额外源码/说明文件。**当前参赛应用的实现代码没有待提交或待推送部分。** 此结论仅针对该仓库，不代表整台电脑或所有相关旧工程均已公开。
+本次聊天应用需要的项目源码已经提交到 `petsupport-bench`。没有另外留着一份未公开的核心实现。运行时需要自己配置 Hy3 密钥、安装依赖，但不需要我电脑里的其他工程或私人数据库。
 
-必须区分：
+这里有三种情况容易混在一起，我分开说明：
 
-- **未提交的运行文件**：密钥、安装依赖、本机数据等，出于安全或可复现惯例不上传。
-- **已提交但未接入的代码**：仓库中保留的旧客服系统模块，不属于当前演示运行路径。
-- **尚未实现的能力**：例如真实商城集成、云端多用户记忆，不能说成“代码没有提交”。
+- 密钥、依赖安装目录和本机聊天数据没有上传。
+- 旧客服代码有一部分留在仓库里，但没有接入现在的聊天入口。
+- 真实商城集成、云端多用户记忆等功能还没做，不是做完了但没交代码。
 
-## 2. 已提交并用于当前交付的材料
+## 二、仓库里有哪些材料
 
-| 类别 | 路径 | 说明 |
+| 材料 | 位置 | 内容 |
 |---|---|---|
-| 应用入口 | `streamlit_demo.py`、`start_demo.cmd` | 当前演示入口，不依赖旁边的旧工程目录 |
-| 核心源码 | `app/chat_session.py`、`app/memory.py`、`app/memory_store.py`、`app/triage/`、`app/guardrails/`及相关模型/配置 | 聊天、记忆、处理管线与输出检查 |
-| 环境说明 | `requirements-demo.txt`、`.env.example`、README | 提供依赖声明和空白配置，不提供密钥 |
-| 数据和评测 | `data/cases_final.jsonl`、`data/knowledge_base.jsonl`、`prompts/final_judge.md`、`eval/final_judge.py`、相关脚本 | 作者构造样本、有限知识卡片、评判规则 |
-| 结果和验证 | `results/final/`、`results/memory/` | 原始输出、调用记录、评分及独立记忆验证 |
-| 测试和自动检查 | `tests/test_final_submission.py`、`tests/test_memory.py`、`.github/workflows/submission.yml` | 聚焦测试、GitHub自动检查；不表示旧系统全部测试都已验收 |
-| 说明与演示 | `docs/`、`demo/demo.mp4` | 报告、方法、功能边界及真实录制视频 |
+| 应用入口 | `streamlit_demo.py`、`start_demo.cmd` | 当前聊天演示和启动脚本 |
+| 核心源码 | `app/chat_session.py`、`app/memory.py`、`app/memory_store.py`、`app/triage/`、`app/guardrails/`及相关模型和配置 | 聊天、记忆、信息处理和输出检查 |
+| 环境配置 | `requirements-demo.txt`、`.env.example`、README | 依赖版本、空白配置和运行方法 |
+| 数据与评分器 | `data/cases_final.jsonl`、`data/knowledge_base.jsonl`、`prompts/final_judge.md`、`eval/final_judge.py`及相关脚本 | 构造样本、知识卡片、七维评分 |
+| 实验记录 | `results/final/`、`results/memory/` | 原始输出、调用记录、评分和单独的记忆验证 |
+| 测试 | `tests/test_final_submission.py`、`tests/test_memory.py`、`.github/workflows/submission.yml` | 当前参赛应用的测试和 GitHub 自动检查 |
+| 文档与视频 | `docs/`、`demo/demo.mp4` | 设计、报告、使用说明和录制视频 |
 
-## 3. 不随仓库上传的文件及原因
+## 三、哪些文件没有上传，为什么
 
-| 文件/目录 | 不上传原因 | 导师如何获得等效运行条件 |
+| 文件 | 原因 | 换一台电脑怎么运行 |
 |---|---|---|
-| `.env`、密钥文件 | 包含访问凭据；不能公开 | 复制`.env.example`，填写自己的Hy3接口和密钥 |
-| `.venv/`、`venv/`、依赖缓存 | 是本机安装产物，不是本项目遗漏源码 | 按`requirements-demo.txt`重新安装；当前验证环境为Python 3.11 |
-| `.local/`、数据库文件 | 开启保存后产生的个人宠物档案与聊天记录，可能含隐私 | 空库可自动创建，使用自己的测试信息；不需要作者的私人数据库 |
-| `__pycache__/`、测试缓存、日志、构建产物 | 可重新生成，部分日志可能含用户输入 | 运行程序或测试时生成 |
+| `.env`、密钥文件 | 含 API 访问凭据，不能公开 | 复制 `.env.example`，填写自己的 Hy3 配置 |
+| `.venv/`、`venv/`、依赖缓存 | 是本机安装的第三方环境 | 用 Python 3.11 按 `requirements-demo.txt` 安装 |
+| `.local/`、数据库文件 | 可能含宠物档案和聊天隐私 | 程序会创建空库，使用自己的测试信息即可 |
+| `__pycache__/`、测试缓存、日志和构建产物 | 运行时会生成，部分还可能含用户输入 | 启动程序或运行测试后会重新生成 |
 
-上述排除规则见[.gitignore](../.gitignore)。未上传作者的API额度或本机环境，不影响源码交付的完整性；但在线模型复现需要有效API服务。公开的评测记录不包含API密钥。
+这些规则写在[.gitignore](../.gitignore)里。公开的评测记录不包含 API 密钥。线上模型调用需要有效的 API 服务；这部分配置由运行者自行提供。
 
-## 4. 已在仓库中、但没有接入当前演示的旧模块
+## 四、旧客服代码和这次项目的关系
 
-| 旧代码 | 当前关系 |
+这次是在我原来的客服工程上改造，不是所有内容都重新从零写。仓库保留了一些旧模块，方便查看来源，但当前入口只使用其中一部分。
+
+| 旧代码 | 现在的情况 |
 |---|---|
-| `app/agents/ticket_agent.py`、`app/agents/state.py`、`app/agents/tools.py` | 保留旧客服Agent及Redis会话相关实现；当前聊天记忆走`app/memory.py`与SQLite，不经过该Redis层 |
-| `app/services/`中的向量检索、重排和旧回复生成等模块 | 保留供工程溯源；当前知识检索是小型知识卡片关键词匹配，不宣称已启用旧向量/RAG链路 |
-| `app/main.py`、`app/api/`、`app/static/`等旧API/页面 | 不是README指定的当前Streamlit入口；旧工程依赖与服务需另行配置 |
-| `pyproject.toml`中的旧客服依赖组合 | 保留兼容性元数据；当前演示按`requirements-demo.txt`安装，不要求运行全部旧集成 |
+| `app/agents/ticket_agent.py`、`app/agents/state.py`、`app/agents/tools.py` | 有旧 Agent 和 Redis 会话实现；现在的记忆走 `app/memory.py` 和 SQLite |
+| `app/services/` 中的向量检索、重排和旧回复生成 | 当前没有接这条链路，知识卡片用关键词匹配 |
+| `app/main.py`、`app/api/`、`app/static/` | 属于旧 API 和页面，不是 README 中的 Streamlit 入口 |
+| `pyproject.toml` 中的旧依赖组合 | 仍保留；运行当前演示按 `requirements-demo.txt` 安装即可 |
 
-工作区另有`zoomed`、`customer-support-agent-main`等相关目录，它们不是本次仓库的整体交付对象。部分相关代码已经迁入当前仓库，因此不能将“旧工程未整体提交”表述为“所有旧工程代码都未提交”。本次未对这些旁系目录进行逐文件完整性审计，导师运行当前应用也不需要它们。
+本机旁边的 `zoomed` 和 `customer-support-agent-main` 没有作为完整工程一起提交。部分旧代码已经迁到本仓库，当前应用不依赖这些旁边的目录。这次的文件检查针对参赛仓库，没有逐一检查所有旧工程。
 
-## 5. 历史材料不能当作当前完成证明
+## 五、历史方案和结果怎么看
 
-- `docs/proposal.md`为历史方案，其中的四配置消融、生产部署等计划不等于已完成；README与最终报告优先。
-- 旧A0/A1/A2/A3模拟结果、旧图和有评分问题的`live_A3_results.csv`保留供溯源，不作为真实实验结论。
-- 冻结单轮评测、后续聊天修复、记忆v2和视频分别对应不同版本，不能将它们拼接成“最新版本已完成同一套全面验证”。
+[最初方案](proposal.md)里有四配置消融、较大知识库、人工标注等计划，最后并没有全部完成。我在文档里补了实际调整，当前实现以 README 和项目介绍为准。
 
-尚未实现或尚未验证的能力，请看[导师项目说明第六节](project_overview.md#六完成状态与尚未覆盖的部分)。后续若继续开发，应新增版本与验证记录，不覆盖原始结果。
+旧模拟结果、旧图，以及评分有问题的 `live_A3_results.csv` 都保留作开发记录，没有用来支持最终结论。
+
+批量评测、聊天修复、记忆升级和视频分别对应不同时间的版本。后来新增功能没有重新跑完整批量评测，我把各自的验证记录分开保存了。还没完成的部分见[项目介绍](project_overview.md)第六节。

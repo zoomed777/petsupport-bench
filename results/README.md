@@ -1,8 +1,12 @@
-# 结果目录说明
+# 结果文件怎么看
 
-正式提交的可追溯实验在 `final/`。`preflight/`为参数核查，不用于结论。
+这次正式实验放在 `final/`，包括完整评分、模型输出、调用记录和方法验证。[实验报告](../docs/experiment_report.md)只读取这里的当前运行指纹和对应最新记录。
 
-根目录 A0/A1/A2/A3_results.csv、full_results.csv、dashboard图、vulnerability_map.md、prompt_patches.json 是开发期模拟产物。
-live_A3_results.csv 是旧版不完整运行，未保存模型调用证据，且槽位评分曾读取参考标签；76.06分与零闸门结论无效。
+`memory/` 是后来补的记忆功能验证，单独保存，没有并入原批量评分。`preflight/` 只是参数检查记录，不用于实验结论。
 
-旧文件保留作开发历史，不得标为真实Hy3实验。报告只读取final/summary.json中的当前运行哈希及对应最新记录。
+下面这些是早期开发文件，我保留它们方便回看，但没有采用其结论：
+
+- 根目录的 A0/A1/A2/A3_results.csv、full_results.csv、旧 dashboard 图、vulnerability_map.md 和 prompt_patches.json：使用模拟数据生成。
+- live_A3_results.csv：旧版运行缺少模型调用记录，槽位评分还曾读取参考标签，因此其中的 76.06 分和零闸门结果不可靠。
+
+如果只想看这次提交的结果，从 `final/` 和 `memory/` 开始即可。
